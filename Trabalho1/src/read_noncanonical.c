@@ -50,8 +50,8 @@ STATE state = START;
 
 int main(int argc, char *argv[])
 {
-    int fd, res, res_cntrl;
-    char buf[255], readBuf[5], ua_buf[5];
+    int fd;
+    char readBuf[5], ua_buf[5];
     // Program usage: Uses either COM1 or COM2
     const char *serialPortName = argv[1];
 
@@ -117,11 +117,13 @@ int main(int argc, char *argv[])
 
     while(state != STOP) {
         
-        res_cntrl = read(fd,readBuf,1);    
+        if (read(fd,readBuf,1) <= 0)
+            return -1; 
         switch(state) {
             case START:
 				if (readBuf[0] == FLAG) {
 					state = FLAG_RCV;
+                    printf("SET: FLAG received\n");
                 }
                 else {
                     state = START;
@@ -129,8 +131,10 @@ int main(int argc, char *argv[])
                 break;
 
             case FLAG_RCV:
-                if (readBuf[0] == ADDRESS)
+                if (readBuf[0] == ADDRESS) {
                     state = A_RCV;
+                    printf("SET: A received\n");
+                }
                 else if (readBuf[0] == FLAG){
                     state = FLAG_RCV;
                 }
@@ -140,8 +144,10 @@ int main(int argc, char *argv[])
                 break;
 
             case A_RCV:
-                if (readBuf[0] == SET)
+                if (readBuf[0] == SET) {
                     state = C_RCV;
+                    printf("SET: C received\n");
+                }
                 else if (readBuf[0] == FLAG){
                     state = FLAG_RCV;
                 }
@@ -151,8 +157,10 @@ int main(int argc, char *argv[])
                 break;
 
             case C_RCV:
-                if (readBuf[0] == ADDRESS^SET)
+                if (readBuf[0] == (ADDRESS^SET)) {
                     state = BCC_OK;
+                    printf("SET: BCC OK\n");
+                }
                 else if (readBuf[0] == FLAG){
                     state = FLAG_RCV;
                 }
@@ -162,8 +170,10 @@ int main(int argc, char *argv[])
                 break;
 
             case BCC_OK:
-                if (readBuf[0] == FLAG)
+                if (readBuf[0] == FLAG) {
                     state = STOP;
+                    printf("SET: FLAG #2 received\n");
+                }
                 else {
                     state = START;
                 }
@@ -182,7 +192,7 @@ int main(int argc, char *argv[])
     ua_buf[2] = UA;
     ua_buf[3] = ua_buf[1]^ua_buf[2];
     ua_buf[4] = FLAG;
-    res = write(fd,ua_buf,5);
+    write(fd,ua_buf,5);
 
     
 

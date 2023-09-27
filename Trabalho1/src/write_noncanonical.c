@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <termios.h>
 #include <unistd.h>
+#include <signal.h>
 
 // Baudrate settings are defined in <asm/termbits.h>, which is
 // included by <termios.h>
@@ -50,7 +51,7 @@ STATE state = START;
 
 int main(int argc, char *argv[])
 {
-    int fd, res, res_cntrl;
+    int fd;
     char set_buf[5], ua_buf[5];
     // Program usage: Uses either COM1 or COM2
     const char *serialPortName = argv[1];
@@ -128,18 +129,23 @@ int main(int argc, char *argv[])
 
     while(state != STOP && alarmCount < 4) {
 
+        printf("While start\n");
         if (alarmEnabled == FALSE)
         {
-            res = write(fd,set_buf,5);
+            if( (write(fd, set_buf, 5)) <= 0)
+                return -1;
             alarm(3); // Set alarm to be triggered in 3s
             alarmEnabled = TRUE;
         }
-        
-        res_cntrl = read(fd,ua_buf,1);    
+
+        if (read(fd,ua_buf,1) <= 0)
+            return -1;      
+
         switch(state) {
             case START:
 				if (ua_buf[0] == FLAG) {
 					state = FLAG_RCV;
+                    printf("UA: FLAG received\n");
                 }
                 else {
                     state = START;
@@ -149,9 +155,11 @@ int main(int argc, char *argv[])
             case FLAG_RCV:
                 if (ua_buf[0] == ADDRESS) {
                     state = A_RCV;
+                    printf("UA: A received\n");
                 }
                 else if (ua_buf[0] == FLAG){
                     state = FLAG_RCV;
+                    printf("UA: FLAG received repeated\n");
                 }
                 else {
                     state = START;
@@ -159,8 +167,10 @@ int main(int argc, char *argv[])
                 break;
 
             case A_RCV:
-                if (ua_buf[0] == UA)
+                if (ua_buf[0] == UA) {
                     state = C_RCV;
+                    printf("UA: C received\n");
+                }
                 else if (ua_buf[0] == FLAG){
                     state = FLAG_RCV;
                 }
@@ -170,8 +180,10 @@ int main(int argc, char *argv[])
                 break;
 
             case C_RCV:
-                if (ua_buf[0] == ADDRESS^UA)
+                if (ua_buf[0] == (ADDRESS^UA)) {
                     state = BCC_OK;
+                    printf("UA: BCC OK\n");
+                }
                 else if (ua_buf[0] == FLAG){
                     state = FLAG_RCV;
                 }
@@ -183,8 +195,10 @@ int main(int argc, char *argv[])
             case BCC_OK:
                 if (ua_buf[0] == FLAG) {
                     state = STOP;
+                    printf("UA: FLAG #2 received\n");
                     alarm(0);
-                    alarmEnabled = FALSE;
+                    alarmEnabled = TRUE;
+                    printf("alarm stopped\n");
                 }
                 else {
                     state = START;
@@ -196,6 +210,9 @@ int main(int argc, char *argv[])
                 break;
                  
         }
+
+        printf("end of loop, state -> %d, alarmEnabled -> %d\n", state, alarmEnabled);
+
     }
 
 
