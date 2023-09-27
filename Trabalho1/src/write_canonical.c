@@ -1,6 +1,4 @@
 // Write to serial port in canonical mode
-//
-// Modified by: Eduardo Nuno Almeida [enalmeida@fe.up.pt]
 
 #include <fcntl.h>
 #include <stdio.h>

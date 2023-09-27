@@ -1,6 +1,4 @@
 // Read from serial port in non-canonical mode
-//
-// Modified by: Eduardo Nuno Almeida [enalmeida@fe.up.pt]
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -21,10 +19,39 @@
 
 #define BUF_SIZE 256
 
-volatile int STOP = FALSE;
+#define FLAG 0x7e
+#define ADDRESS 0x03
+#define SET 0x03
+#define UA 0x07
+
+typedef enum{
+    START,
+    FLAG_RCV,
+    A_RCV,
+    C_RCV,
+    BCC_OK,
+    STOP,
+} STATE;
+
+int alarmEnabled = FALSE;
+int alarmCount = 0;
+
+// Alarm function handler
+void alarmHandler(int signal)
+{
+    alarmEnabled = FALSE;
+    alarmCount++;
+
+    printf("Alarm #%d\n", alarmCount);
+}
+
+// Inital State
+STATE state = START;
 
 int main(int argc, char *argv[])
 {
+    int fd, res, res_cntrl;
+    char buf[255], readBuf[5], ua_buf[5];
     // Program usage: Uses either COM1 or COM2
     const char *serialPortName = argv[1];
 
@@ -32,15 +59,15 @@ int main(int argc, char *argv[])
     {
         printf("Incorrect program usage\n"
                "Usage: %s <SerialPort>\n"
-               "Example: %s /dev/ttyS1\n",
+               "Example: %s /dev/ttyS5\n",
                argv[0],
                argv[0]);
         exit(1);
     }
 
-    // Open serial port device for reading and writing and not as controlling tty
+    // Open serial port device for reading and writing and not as staterolling tty
     // because we don't want to get killed if linenoise sends CTRL-C.
-    int fd = open(serialPortName, O_RDWR | O_NOCTTY);
+    fd = open(serialPortName, O_RDWR | O_NOCTTY);
     if (fd < 0)
     {
         perror(serialPortName);
@@ -60,14 +87,14 @@ int main(int argc, char *argv[])
     // Clear struct for new port settings
     memset(&newtio, 0, sizeof(newtio));
 
-    newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
-    newtio.c_iflag = IGNPAR;
-    newtio.c_oflag = 0;
+    newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD; // staterol flag
+    newtio.c_iflag = IGNPAR; // receiver config flag
+    newtio.c_oflag = 0; // transmitter config flag
 
     // Set input mode (non-canonical, no echo,...)
     newtio.c_lflag = 0;
     newtio.c_cc[VTIME] = 0; // Inter-character timer unused
-    newtio.c_cc[VMIN] = 5;  // Blocking read until 5 chars received
+    newtio.c_cc[VMIN] = 1;  // Blocking read until 5 chars received
 
     // VTIME e VMIN should be changed in order to protect with a
     // timeout the reception of the following character(s)
@@ -88,19 +115,76 @@ int main(int argc, char *argv[])
 
     printf("New termios structure set\n");
 
-    // Loop for input
-    unsigned char buf[BUF_SIZE + 1] = {0}; // +1: Save space for the final '\0' char
+    while(state != STOP) {
+        
+        res_cntrl = read(fd,readBuf,1);    
+        switch(state) {
+            case START:
+				if (readBuf[0] == FLAG) {
+					state = FLAG_RCV;
+                }
+                else {
+                    state = START;
+                }
+                break;
 
-    while (STOP == FALSE)
-    {
-        // Returns after 5 chars have been input
-        int bytes = read(fd, buf, BUF_SIZE);
-        buf[bytes] = '\0'; // Set end of string to '\0', so we can printf
+            case FLAG_RCV:
+                if (readBuf[0] == ADDRESS)
+                    state = A_RCV;
+                else if (readBuf[0] == FLAG){
+                    state = FLAG_RCV;
+                }
+                else {
+                    state = START;
+                }
+                break;
 
-        printf(":%s:%d\n", buf, bytes);
-        if (buf[0] == 'z')
-            STOP = TRUE;
+            case A_RCV:
+                if (readBuf[0] == SET)
+                    state = C_RCV;
+                else if (readBuf[0] == FLAG){
+                    state = FLAG_RCV;
+                }
+                else {
+                    state = START;
+                }
+                break;
+
+            case C_RCV:
+                if (readBuf[0] == ADDRESS^SET)
+                    state = BCC_OK;
+                else if (readBuf[0] == FLAG){
+                    state = FLAG_RCV;
+                }
+                else {
+                    state = START;
+                }
+                break;
+
+            case BCC_OK:
+                if (readBuf[0] == FLAG)
+                    state = STOP;
+                else {
+                    state = START;
+                }
+                break;
+
+            default:
+                state = START;
+                break;
+                 
+        }
     }
+
+    // Create UA Buffer to send
+    ua_buf[0] = FLAG;
+    ua_buf[1] = ADDRESS;
+    ua_buf[2] = UA;
+    ua_buf[3] = ua_buf[1]^ua_buf[2];
+    ua_buf[4] = FLAG;
+    res = write(fd,ua_buf,5);
+
+    
 
     // The while() cycle should be changed in order to respect the specifications
     // of the protocol indicated in the Lab guide

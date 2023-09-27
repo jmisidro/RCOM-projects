@@ -1,8 +1,5 @@
 // Virtual cable program to test serial port.
 // Creates a pair of virtual Tx / Rx serial ports using "socat".
-//
-// Author: Manuel Ricardo [mricardo@fe.up.pt]
-// Modified by: Eduardo Nuno Almeida [enalmeida@fe.up.pt]
 
 #include <fcntl.h>
 #include <stdio.h>

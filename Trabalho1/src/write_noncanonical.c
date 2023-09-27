@@ -1,6 +1,4 @@
 // Write to serial port in non-canonical mode
-//
-// Modified by: Eduardo Nuno Almeida [enalmeida@fe.up.pt]
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -19,12 +17,41 @@
 #define FALSE 0
 #define TRUE 1
 
+#define FLAG 0x7e
+#define ADDRESS 0x03
+#define SET 0x03
+#define UA 0x07
+
 #define BUF_SIZE 256
 
-volatile int STOP = FALSE;
+typedef enum{
+    START,
+    FLAG_RCV,
+    A_RCV,
+    C_RCV,
+    BCC_OK,
+    STOP,
+} STATE;
+
+int alarmEnabled = FALSE;
+int alarmCount = 0;
+
+// Alarm function handler
+void alarmHandler(int signal)
+{
+    alarmEnabled = FALSE;
+    alarmCount++;
+
+    printf("Alarm #%d\n", alarmCount);
+}
+
+// Inital State
+STATE state = START;
 
 int main(int argc, char *argv[])
 {
+    int fd, res, res_cntrl;
+    char set_buf[5], ua_buf[5];
     // Program usage: Uses either COM1 or COM2
     const char *serialPortName = argv[1];
 
@@ -40,7 +67,7 @@ int main(int argc, char *argv[])
 
     // Open serial port device for reading and writing, and not as controlling tty
     // because we don't want to get killed if linenoise sends CTRL-C.
-    int fd = open(serialPortName, O_RDWR | O_NOCTTY);
+    fd = open(serialPortName, O_RDWR | O_NOCTTY);
 
     if (fd < 0)
     {
@@ -68,7 +95,7 @@ int main(int argc, char *argv[])
     // Set input mode (non-canonical, no echo,...)
     newtio.c_lflag = 0;
     newtio.c_cc[VTIME] = 0; // Inter-character timer unused
-    newtio.c_cc[VMIN] = 5;  // Blocking read until 5 chars received
+    newtio.c_cc[VMIN] = 1;  // Blocking read until 5 chars received
 
     // VTIME e VMIN should be changed in order to protect with a
     // timeout the reception of the following character(s)
@@ -89,21 +116,88 @@ int main(int argc, char *argv[])
 
     printf("New termios structure set\n");
 
-    // Create string to send
-    unsigned char buf[BUF_SIZE] = {0};
+    // Create SET Buffer to send
+    set_buf[0] = FLAG;
+    set_buf[1] = ADDRESS;
+    set_buf[2] = SET;
+    set_buf[3] = set_buf[1]^set_buf[2];
+    set_buf[4] = FLAG;
 
-    for (int i = 0; i < BUF_SIZE; i++)
-    {
-        buf[i] = 'a' + i % 26;
+    // Set alarm function handler
+    (void)signal(SIGALRM, alarmHandler);
+
+    while(state != STOP && alarmCount < 4) {
+
+        if (alarmEnabled == FALSE)
+        {
+            res = write(fd,set_buf,5);
+            alarm(3); // Set alarm to be triggered in 3s
+            alarmEnabled = TRUE;
+        }
+        
+        res_cntrl = read(fd,ua_buf,1);    
+        switch(state) {
+            case START:
+				if (ua_buf[0] == FLAG) {
+					state = FLAG_RCV;
+                }
+                else {
+                    state = START;
+                }
+                break;
+
+            case FLAG_RCV:
+                if (ua_buf[0] == ADDRESS) {
+                    state = A_RCV;
+                }
+                else if (ua_buf[0] == FLAG){
+                    state = FLAG_RCV;
+                }
+                else {
+                    state = START;
+                }
+                break;
+
+            case A_RCV:
+                if (ua_buf[0] == UA)
+                    state = C_RCV;
+                else if (ua_buf[0] == FLAG){
+                    state = FLAG_RCV;
+                }
+                else {
+                    state = START;
+                }
+                break;
+
+            case C_RCV:
+                if (ua_buf[0] == ADDRESS^UA)
+                    state = BCC_OK;
+                else if (ua_buf[0] == FLAG){
+                    state = FLAG_RCV;
+                }
+                else {
+                    state = START;
+                }
+                break;
+
+            case BCC_OK:
+                if (ua_buf[0] == FLAG) {
+                    state = STOP;
+                    alarm(0);
+                    alarmEnabled = FALSE;
+                }
+                else {
+                    state = START;
+                }
+                break;
+
+            default:
+                state = START;
+                break;
+                 
+        }
     }
 
-    // In non-canonical mode, '\n' does not end the writing.
-    // Test this condition by placing a '\n' in the middle of the buffer.
-    // The whole buffer must be sent even with the '\n'.
-    buf[5] = '\n';
-
-    int bytes = write(fd, buf, BUF_SIZE);
-    printf("%d bytes written\n", bytes);
 
     // Wait until all bytes have been written to the serial port
     sleep(1);
