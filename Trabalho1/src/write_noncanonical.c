@@ -129,7 +129,6 @@ int main(int argc, char *argv[])
 
     while(state != STOP && alarmCount < 4) {
 
-        printf("While start\n");
         if (alarmEnabled == FALSE)
         {
             if( (write(fd, set_buf, 5)) <= 0)
@@ -138,7 +137,8 @@ int main(int argc, char *argv[])
             alarmEnabled = TRUE;
         }
 
-        if (read(fd,ua_buf,1) <= 0)
+        // read isnt returning for some reason
+        if (read(fd, ua_buf, 1) <= 0)
             return -1;      
 
         switch(state) {
@@ -210,8 +210,6 @@ int main(int argc, char *argv[])
                 break;
                  
         }
-
-        printf("end of loop, state -> %d, alarmEnabled -> %d\n", state, alarmEnabled);
 
     }
 
