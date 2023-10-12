@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "link_layer.h": "c",
+        "macros.h": "c",
+        "statemachine.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
+}

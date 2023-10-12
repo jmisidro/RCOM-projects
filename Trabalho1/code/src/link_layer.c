@@ -48,11 +48,11 @@ int llread(unsigned char *packet)
 ////////////////////////////////////////////////
 // LLCLOSE
 ////////////////////////////////////////////////
-int llclose(LinkLayer connectionParameters, int fd)
+int llclose(int fd)
 {
     printf("Closing connection...\n");
     
-    if ( (closeNonCanonical(connectionParameters.oldtio, fd)) == -1)
+    if ( (closeNonCanonical(oldtio, fd)) == -1)
         return -1;
 
     return 1;

@@ -19,8 +19,11 @@ typedef struct
     int baudRate;
     int nRetransmissions;
     int timeout;
-    struct termios oldtio;
 } LinkLayer;
+
+// global variables
+LinkLayer ll;
+struct termios oldtio;
 
 // SIZE of maximum acceptable payload.
 // Maximum number of bytes that application layer should send to link layer
@@ -45,8 +48,7 @@ int llread(unsigned char *packet);
 // Close previously opened connection.
 // con includes fd and oldtio struct.
 // fd is the File descriptor that was opened with the given port.
-// oldtio termios used to store oldtio to restore the old port settings when closing the connection
 // Return "1" on success or "-1" on error.
-int llclose(LinkLayer connectionParameters, int fd);
+int llclose(int fd);
 
 #endif // _LINK_LAYER_H_

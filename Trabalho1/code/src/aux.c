@@ -1,16 +1,31 @@
 // Write to serial port in non-canonical mode
 #include "aux.h"
 
-int alarmEnabled = FALSE;
-int alarmCount = 0;
+// global variables
+int finish, num_retr, resendFrame;
 
-// Alarm function handler
-void alarmHandler(int signal)
-{
-    alarmEnabled = FALSE;
-    alarmCount++;
+/**
+ * Handles the alarm signal
+ * @param signal Signal that is received
+ */
+void alarmHandler(int signal) {
 
-    printf("Alarm #%d\n", alarmCount);
+  if(num_retr < ll.nRetransmissions){
+    resendFrame = TRUE;
+    printf("Alarm: Timeout, Sending frame again... (Number of retries: %d)\n", num_retr);
+    alarm(ll.timeout);
+    num_retr++;
+
+  }
+  else{
+    printf("Alarm: Number of retries exceeded\n");
+    finish = TRUE;
+  }
+}
+
+void alarmHandlerInstaller() {
+    // Set alarm function handler
+    (void)signal(SIGALRM, alarmHandler);
 }
 
 
@@ -28,8 +43,8 @@ int openNonCanonical(LinkLayer connectionParameters, int vtime, int vmin) {
 
     struct termios newtio;
 
-    // Save current port settings --> save oldtio in LinkLayer struct
-    if (tcgetattr(fd, &connectionParameters.oldtio) == -1)
+    // Save current port settings
+    if (tcgetattr(fd, &oldtio) == -1)
     {
         perror("tcgetattr");
         exit(-1);
@@ -92,6 +107,17 @@ unsigned char createBCC(unsigned char a, unsigned char c) {
     return a ^ c;
 }
 
+unsigned char createBCC_2(unsigned char* frame, int length) {
+
+  unsigned char bcc2 = frame[0];
+
+  for(int i = 1; i < length; i++){
+    bcc2 = bcc2 ^ frame[i];
+  }
+
+  return bcc2;
+}
+
 int createSupervisionFrame(unsigned char* frame, unsigned char controlField, int role) {
 
     frame[0] = FLAG;
@@ -125,6 +151,70 @@ int createSupervisionFrame(unsigned char* frame, unsigned char controlField, int
     return 0;
 }
 
+int createInformationFrame(unsigned char* frame, unsigned char controlField, unsigned char* infoField, int infoFieldLength) {
+
+  frame[0] = FLAG;
+
+  frame[1] = END_SEND;
+
+  frame[2] = controlField;
+
+  frame[3] = createBCC(frame[1], frame[2]);
+
+  for(int i = 0; i < infoFieldLength; i++) {
+    frame[i + 4] = infoField[i];
+  }
+
+  frame[infoFieldLength + 4] = createBCC_2(infoField, infoFieldLength);
+
+  frame[infoFieldLength + 5] = FLAG;
+
+  return 0;
+}
+
+
+int readSupervisionFrame(unsigned char* frame, int fd, unsigned char* expectedBytes, int expectedBytesLength, unsigned char addressByte) {
+
+    state_machine *st = create_state_machine(expectedBytes, expectedBytesLength, addressByte);
+
+    unsigned char byte;
+
+    while(st->state != STOP && !finish && !resendFrame) {
+        if(readByte(&byte, fd) == 0)
+            event_handler(st, byte, frame, SUPERVISION);
+    }
+
+    int ret = st->foundIndex;
+
+    destroy_st(st);
+
+    if(finish || resendFrame)
+        return -1;
+
+    return ret;
+
+}
+
+
+int readInformationFrame(unsigned char* frame, int fd, unsigned char* expectedBytes, int expectedBytesLength, unsigned char addressByte) {
+
+    state_machine *st = create_state_machine(expectedBytes, expectedBytesLength, addressByte);
+    unsigned char byte;
+
+    while(st->state != STOP) {
+        if(readByte(&byte, fd) == 0)
+            event_handler(st, byte, frame, INFORMATION);
+    }
+
+    // dataLength = length of the data packet sent from the application on the transmitter side
+    //              (includes data packet + bcc2, with stuffing)
+    int ret = st->dataLength;
+
+    destroy_st(st);
+
+    return ret;
+}
+
 
 int sendFrame(unsigned char* frame, int fd, int length) {
     if( (write(fd, frame, length)) <= 0){
@@ -134,26 +224,33 @@ int sendFrame(unsigned char* frame, int fd, int length) {
     return 1;
 }
 
+int readByte(unsigned char* byte, int fd) {
+
+    if(read(fd, byte, sizeof(unsigned char)) <= 0)
+        return -1;
+
+    return 0;
+}
+
 int stateMachineTx(LinkLayer connectionParameters, int fd) {
     // Initial state
-    STATE state = START;
+    state state = START;
 
-    // Set alarm function handler
-    (void)signal(SIGALRM, alarmHandler);
+    alarmHandlerInstaller();
 
     // Create SET Buffer to send
     char set_buf[5], ua_buf[5];
     createSupervisionFrame(set_buf, SET, LlTx);
 
-    while(state != STOP && alarmCount < connectionParameters.nRetransmissions) {
+    while(state != STOP && !finish) {
 
-        if (alarmEnabled == FALSE)
+        if (resendFrame == FALSE)
         {
             // Resend SET Frame
             if( (sendFrame(set_buf, fd, sizeof(set_buf))) <= 0)
                 return -1;
             alarm(connectionParameters.timeout); // Set alarm to be triggered in # seconds
-            alarmEnabled = TRUE;
+            resendFrame = TRUE;
         }
 
         read(fd, ua_buf, 1);  
@@ -214,7 +311,7 @@ int stateMachineTx(LinkLayer connectionParameters, int fd) {
                     state = STOP;
                     printf("UA: FLAG #2 received\n");
                     alarm(0);
-                    alarmEnabled = TRUE;
+                    resendFrame = TRUE;
                     printf("alarm stopped\n");
                 }
                 else {
@@ -235,7 +332,7 @@ int stateMachineTx(LinkLayer connectionParameters, int fd) {
 
 int stateMachineRx(LinkLayer connectionParameters, int fd) {
     // Initial state
-    STATE state = START;
+    state state = START;
 
     // Create SET Buffer to send
     char readBuf[5], ua_buf[5];
