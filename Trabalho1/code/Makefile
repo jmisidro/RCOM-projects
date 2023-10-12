@@ -10,8 +10,8 @@ INCLUDE = include/
 BIN = bin/
 CABLE_DIR = cable/
 
-TX_SERIAL_PORT = /dev/ttys004
-RX_SERIAL_PORT = /dev/ttys005
+TX_SERIAL_PORT = /dev/ttys003
+RX_SERIAL_PORT = /dev/ttys004
 
 TX_FILE = penguin.gif
 RX_FILE = penguin-received.gif

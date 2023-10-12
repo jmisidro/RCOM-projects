@@ -140,7 +140,7 @@ int readByte(unsigned char* byte, int fd) {
     return 0;
 }
 
-int stateMachineTx(int fd) {
+int stateMachineTx(LinkLayer connectionParameters, int fd) {
     // Initial state
     STATE state = START;
 
@@ -151,13 +151,14 @@ int stateMachineTx(int fd) {
     char set_buf[5], ua_buf[5];
     createSupervisionFrame(set_buf, END_SEND, TRANSMITTER);
 
-    while(state != STOP && alarmCount < 4) {
+    while(state != STOP && alarmCount < connectionParameters.nRetransmissions) {
 
         if (alarmEnabled == FALSE)
         {
-            if( (write(fd, set_buf, 5)) <= 0)
+            // Resend SET Frame
+            if( (sendFrame(set_buf, fd, sizeof(set_buf))) <= 0)
                 return -1;
-            alarm(3); // Set alarm to be triggered in 3s
+            alarm(connectionParameters.timeout); // Set alarm to be triggered in # seconds
             alarmEnabled = TRUE;
         }
 
@@ -175,7 +176,7 @@ int stateMachineTx(int fd) {
                 break;
 
             case FLAG_RCV:
-                if (ua_buf[0] == END_REC) {
+                if (ua_buf[0] == END_SEND) {
                     state = A_RCV;
                     printf("UA: A received\n");
                 }
@@ -234,8 +235,92 @@ int stateMachineTx(int fd) {
         }
 
     }
+
+    return 0;
 }
 
-int stateMachineRx(int fd) {
-    return -1; 
+int stateMachineRx(LinkLayer connectionParameters, int fd) {
+    // Initial state
+    STATE state = START;
+
+    // Create SET Buffer to send
+    char readBuf[5], ua_buf[5];
+
+    while(state != STOP) {
+        
+        if (read(fd,readBuf,1) <= 0)
+            return -1; 
+        switch(state) {
+            case START:
+				if (readBuf[0] == FLAG) {
+					state = FLAG_RCV;
+                    printf("SET: FLAG received\n");
+                }
+                else {
+                    state = START;
+                }
+                break;
+
+            case FLAG_RCV:
+                if (readBuf[0] == END_SEND) {
+                    state = A_RCV;
+                    printf("SET: A received\n");
+                }
+                else if (readBuf[0] == FLAG){
+                    state = FLAG_RCV;
+                }
+                else {
+                    state = START;
+                }
+                break;
+
+            case A_RCV:
+                if (readBuf[0] == SET) {
+                    state = C_RCV;
+                    printf("SET: C received\n");
+                }
+                else if (readBuf[0] == FLAG){
+                    state = FLAG_RCV;
+                }
+                else {
+                    state = START;
+                }
+                break;
+
+            case C_RCV:
+                if (readBuf[0] == createBCC(END_SEND,SET)) {
+                    state = BCC_OK;
+                    printf("SET: BCC OK\n");
+                }
+                else if (readBuf[0] == FLAG){
+                    state = FLAG_RCV;
+                }
+                else {
+                    state = START;
+                }
+                break;
+
+            case BCC_OK:
+                if (readBuf[0] == FLAG) {
+                    state = STOP;
+                    printf("SET: FLAG #2 received\n");
+                }
+                else {
+                    state = START;
+                }
+                break;
+
+            default:
+                state = START;
+                break;
+                 
+        }
+    }
+
+    // Create UA Buffer to send
+    createSupervisionFrame(ua_buf, END_SEND, TRANSMITTER);
+    if( (sendFrame(ua_buf, fd, sizeof(ua_buf))) <= 0)
+        return -1;
+
+    return 0; 
 }

@@ -15,14 +15,18 @@ int llopen(LinkLayer connectionParameters)
 {
     int fd;
     struct termios oldtio;
+    // Open non canonical connection
     if ( (fd = openNonCanonical(connectionParameters, oldtio, VTIME_VALUE, VMIN_VALUE)) == -1)
         return -1;
 
+    // Run state machine to ensure the establishment phase
     if(connectionParameters.role == LlTx)
-        stateMachineTx(fd);
+        stateMachineTx(connectionParameters, fd);
     else if(connectionParameters.role == LlRx)
-        stateMachineRx(fd);
+        stateMachineRx(connectionParameters, fd);
 
+    // Close non canonical connection
+    printf("Closing connection...\n");
     if ( (closeNonCanonical(fd, oldtio)) == -1)
         return -1;
 

@@ -80,10 +80,20 @@ int sendFrame(unsigned char* frame, int fd, int length);
 int readByte(unsigned char* byte, int fd);
 
 /**
- * Function to create and handle a state maching
+ * Function to create and handle a state machine as transmitter 
+ * @param connectionParameters linklayer struct including info such as port
  * @param fd File descriptor from which to read the byte
- * @return Return -1 if an error occurs
+ * @return 0 if successful; negative if an error occurs
  */
-int stateMachineTx(int fd);
+int stateMachineTx(LinkLayer connectionParameters, int fd);
+
+
+/**
+ * Function to create and handle a state machine as receiver
+ * @param connectionParameters linklayer struct including info such as port
+ * @param fd File descriptor from which to read the byte
+ * @return 0 if successful; negative if an error occurs
+ */
+int stateMachineRx(LinkLayer connectionParameters, int fd);
 
 #endif // _AUX_H_

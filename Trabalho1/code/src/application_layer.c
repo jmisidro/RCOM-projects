@@ -4,6 +4,7 @@
 #include "link_layer.h"
 #include "macros.h"
 #include <string.h>
+#include <stdio.h>
 
 void applicationLayer(const char *serialPort, const char *role, int baudRate,
                       int nTries, int timeout, const char *filename)
@@ -11,12 +12,14 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
     // llopen
     LinkLayer connection;
     strcpy(connection.serialPort, serialPort);
-    if (strcmp('tx', role) == 0)
+
+    if (strcmp("tx", role) == 0)
         connection.role = LlTx;
-    else if (strcmp('rx', role) == 0)
+    else if (strcmp("rx", role) == 0)
         connection.role = LlRx;
     connection.baudRate = baudRate;
     connection.nRetransmissions = nTries;
     connection.timeout = timeout;
+    printf("Opening connection...\n");
     llopen(connection);
 }

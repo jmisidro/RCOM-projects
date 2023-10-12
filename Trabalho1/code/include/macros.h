@@ -20,9 +20,6 @@
 #define SUPERVISION 0
 #define INFORMATION 1
 
-#define NUM_RETR    3
-#define TIMEOUT     3
-
 #define FLAG     0x7E
 #define END_SEND 0x03
 #define END_REC  0x01
