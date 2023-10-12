@@ -1,12 +1,8 @@
 // Link layer protocol implementation
 
-#include <termios.h>
 #include "macros.h"
 #include "aux.h"
 #include "link_layer.h"
-
-// MISC
-#define _POSIX_SOURCE 1 // POSIX compliant source
 
 ////////////////////////////////////////////////
 // LLOPEN
@@ -14,9 +10,10 @@
 int llopen(LinkLayer connectionParameters)
 {
     int fd;
-    struct termios oldtio;
+
+    printf("Opening connection...\n");
     // Open non canonical connection
-    if ( (fd = openNonCanonical(connectionParameters, oldtio, VTIME_VALUE, VMIN_VALUE)) == -1)
+    if ( (fd = openNonCanonical(connectionParameters, VTIME_VALUE, VMIN_VALUE)) == -1)
         return -1;
 
     // Run state machine to ensure the establishment phase
@@ -25,12 +22,7 @@ int llopen(LinkLayer connectionParameters)
     else if(connectionParameters.role == LlRx)
         stateMachineRx(connectionParameters, fd);
 
-    // Close non canonical connection
-    printf("Closing connection...\n");
-    if ( (closeNonCanonical(fd, oldtio)) == -1)
-        return -1;
-
-    return 1;
+    return fd;
 }
 
 ////////////////////////////////////////////////
@@ -56,9 +48,12 @@ int llread(unsigned char *packet)
 ////////////////////////////////////////////////
 // LLCLOSE
 ////////////////////////////////////////////////
-int llclose(int showStatistics)
+int llclose(LinkLayer connectionParameters, int fd)
 {
-    // TODO
+    printf("Closing connection...\n");
+    
+    if ( (closeNonCanonical(connectionParameters.oldtio, fd)) == -1)
+        return -1;
 
     return 1;
 }

@@ -3,6 +3,7 @@
 #include "application_layer.h"
 #include "link_layer.h"
 #include "macros.h"
+#include "aux.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -10,16 +11,19 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
                       int nTries, int timeout, const char *filename)
 {
     // llopen
-    LinkLayer connection;
-    strcpy(connection.serialPort, serialPort);
+    LinkLayer ll;
+    int fd;
 
+    strcpy(ll.serialPort, serialPort);
     if (strcmp("tx", role) == 0)
-        connection.role = LlTx;
+        ll.role = LlTx;
     else if (strcmp("rx", role) == 0)
-        connection.role = LlRx;
-    connection.baudRate = baudRate;
-    connection.nRetransmissions = nTries;
-    connection.timeout = timeout;
-    printf("Opening connection...\n");
-    llopen(connection);
+        ll.role = LlRx;
+    ll.baudRate = baudRate;
+    ll.nRetransmissions = nTries;
+    ll.timeout = timeout;
+    fd = llopen(ll);
+
+    // llclose
+    llclose(ll, fd);
 }

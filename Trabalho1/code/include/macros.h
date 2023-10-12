@@ -14,9 +14,6 @@
 #define N_TRIES 3
 #define TIMEOUT 4
 
-#define TRANSMITTER 0
-#define RECEIVER    1
-
 #define SUPERVISION 0
 #define INFORMATION 1
 

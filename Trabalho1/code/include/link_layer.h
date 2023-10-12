@@ -4,6 +4,8 @@
 #ifndef _LINK_LAYER_H_
 #define _LINK_LAYER_H_
 
+#include <termios.h>
+
 typedef enum
 {
     LlTx,
@@ -17,6 +19,7 @@ typedef struct
     int baudRate;
     int nRetransmissions;
     int timeout;
+    struct termios oldtio;
 } LinkLayer;
 
 // SIZE of maximum acceptable payload.
@@ -40,8 +43,10 @@ int llwrite(const unsigned char *buf, int bufSize);
 int llread(unsigned char *packet);
 
 // Close previously opened connection.
-// if showStatistics == TRUE, link layer should print statistics in the console on close.
+// con includes fd and oldtio struct.
+// fd is the File descriptor that was opened with the given port.
+// oldtio termios used to store oldtio to restore the old port settings when closing the connection
 // Return "1" on success or "-1" on error.
-int llclose(int showStatistics);
+int llclose(LinkLayer connectionParameters, int fd);
 
 #endif // _LINK_LAYER_H_

@@ -14,7 +14,7 @@ void alarmHandler(int signal)
 }
 
 
-int openNonCanonical(LinkLayer connectionParameters, struct termios oldtio, int vtime, int vmin) {
+int openNonCanonical(LinkLayer connectionParameters, int vtime, int vmin) {
     // Program usage: Uses either COM1 or COM2
     // Open serial port device for reading and writing, and not as controlling tty
     // because we don't want to get killed if linenoise sends CTRL-C.
@@ -28,8 +28,8 @@ int openNonCanonical(LinkLayer connectionParameters, struct termios oldtio, int 
 
     struct termios newtio;
 
-    // Save current port settings
-    if (tcgetattr(fd, &oldtio) == -1)
+    // Save current port settings --> save oldtio in LinkLayer struct
+    if (tcgetattr(fd, &connectionParameters.oldtio) == -1)
     {
         perror("tcgetattr");
         exit(-1);
@@ -44,8 +44,8 @@ int openNonCanonical(LinkLayer connectionParameters, struct termios oldtio, int 
 
     // Set input mode (non-canonical, no echo,...)
     newtio.c_lflag = 0;
-    newtio.c_cc[VTIME] = 0; // Inter-character timer unused
-    newtio.c_cc[VMIN] = 0;  // Polling read
+    newtio.c_cc[VTIME] = vtime;
+    newtio.c_cc[VMIN] = vmin;
 
     // VTIME e VMIN should be changed in order to protect with a
     // timeout the reception of the following character(s)
@@ -69,7 +69,7 @@ int openNonCanonical(LinkLayer connectionParameters, struct termios oldtio, int 
     return fd;
 }
 
-int closeNonCanonical(int fd, struct termios oldtio) {
+int closeNonCanonical(struct termios oldtio, int fd) {
 
     // Wait until all bytes have been written to the serial port
     sleep(1);
@@ -82,6 +82,8 @@ int closeNonCanonical(int fd, struct termios oldtio) {
     }
 
     close(fd);
+
+    return 1;
 }
 
 
@@ -94,7 +96,7 @@ int createSupervisionFrame(unsigned char* frame, unsigned char controlField, int
 
     frame[0] = FLAG;
 
-    if(role == TRANSMITTER) {
+    if(role == LlTx) {
         if(controlField == SET) {
             frame[1] = END_SEND;
         }
@@ -103,7 +105,7 @@ int createSupervisionFrame(unsigned char* frame, unsigned char controlField, int
         }
         else return -1;
     }
-    else if(role == RECEIVER) {
+    else if(role == LlRx) {
         if(controlField == SET ) {
             frame[1] = END_REC;
         }
@@ -132,14 +134,6 @@ int sendFrame(unsigned char* frame, int fd, int length) {
     return 1;
 }
 
-int readByte(unsigned char* byte, int fd) {
-
-    if(read(fd, byte, sizeof(unsigned char)) <= 0)
-        return -1;
-
-    return 0;
-}
-
 int stateMachineTx(LinkLayer connectionParameters, int fd) {
     // Initial state
     STATE state = START;
@@ -149,7 +143,7 @@ int stateMachineTx(LinkLayer connectionParameters, int fd) {
 
     // Create SET Buffer to send
     char set_buf[5], ua_buf[5];
-    createSupervisionFrame(set_buf, END_SEND, TRANSMITTER);
+    createSupervisionFrame(set_buf, SET, LlTx);
 
     while(state != STOP && alarmCount < connectionParameters.nRetransmissions) {
 
@@ -162,7 +156,7 @@ int stateMachineTx(LinkLayer connectionParameters, int fd) {
             alarmEnabled = TRUE;
         }
 
-        readByte(fd, ua_buf);
+        read(fd, ua_buf, 1);  
 
         switch(state) {
             case START:
@@ -182,7 +176,7 @@ int stateMachineTx(LinkLayer connectionParameters, int fd) {
                 }
                 else if (ua_buf[0] == FLAG){
                     state = FLAG_RCV;
-                    printf("UA: FLAG received repeated\n");
+                    //printf("UA: FLAG received repeated\n");
                 }
                 else {
                     state = START;
@@ -203,7 +197,7 @@ int stateMachineTx(LinkLayer connectionParameters, int fd) {
                 break;
 
             case C_RCV:
-                if (ua_buf[0] == createBCC(END_REC,UA)) {
+                if (ua_buf[0] == createBCC(END_SEND,UA)) {
                     state = BCC_OK;
                     printf("UA: BCC OK\n");
                 }
@@ -247,9 +241,8 @@ int stateMachineRx(LinkLayer connectionParameters, int fd) {
     char readBuf[5], ua_buf[5];
 
     while(state != STOP) {
-        
-        if (read(fd,readBuf,1) <= 0)
-            return -1; 
+        read(fd,readBuf,1);
+
         switch(state) {
             case START:
 				if (readBuf[0] == FLAG) {
@@ -318,9 +311,8 @@ int stateMachineRx(LinkLayer connectionParameters, int fd) {
     }
 
     // Create UA Buffer to send
-    createSupervisionFrame(ua_buf, END_SEND, TRANSMITTER);
-    if( (sendFrame(ua_buf, fd, sizeof(ua_buf))) <= 0)
-        return -1;
+    createSupervisionFrame(ua_buf, UA, LlRx);
+    sendFrame(ua_buf, fd, sizeof(ua_buf));
 
     return 0; 
 }

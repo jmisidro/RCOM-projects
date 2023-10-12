@@ -28,12 +28,11 @@ typedef enum{
  * Function to open the file descriptor through which to execute the serial port communications,
  * in the non-canonical mode, according to the serial port file transfer protocol
  * @param connectionParameters linklayer struct including info such as port
- * @param oldtio termios used to store oldtio to restore the old port settings when closing the connection
  * @param vtime Value to be assigned to the VTIME field of the new settings - time between bytes read
  * @param vmin Value to be assigned to the VMIN field of the new settings - minimum amount of bytes to read
  * @return File descriptor that was opened with the given port
  */
-int openNonCanonical(LinkLayer connectionParameters, struct termios oldtio, int vtime, int vmin);
+int openNonCanonical(LinkLayer connectionParameters, int vtime, int vmin);
 
 /**
  * Function to open the file descriptor through which to execute the serial port communications,
@@ -42,7 +41,7 @@ int openNonCanonical(LinkLayer connectionParameters, struct termios oldtio, int 
  * @param oldtio termios used to store oldtio to restore the old port settings when closing the connection
  * @return Return -1 in an error occurs
  */
-int closeNonCanonical(int fd, struct termios oldtio);
+int closeNonCanonical(struct termios oldtio, int fd);
 
 
 /**
@@ -71,13 +70,6 @@ int createSupervisionFrame(unsigned char* frame, unsigned char controlField, int
  */
 int sendFrame(unsigned char* frame, int fd, int length);
 
-/**
- * Function to read a byte from the designated file descriptor
- * @param byte Address to which to store the byte
- * @param fd File descriptor from which to read the byte
- * @return Return value of the read() call if successful; negative if an error occurs
- */
-int readByte(unsigned char* byte, int fd);
 
 /**
  * Function to create and handle a state machine as transmitter 
