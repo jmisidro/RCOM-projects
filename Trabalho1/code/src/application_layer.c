@@ -3,7 +3,7 @@
 #include "application_layer.h"
 #include "link_layer.h"
 #include "macros.h"
-#include "aux.h"
+#include "ll_aux.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -13,6 +13,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
     // llopen
     int fd;
 
+    // store linklayer info in ll struct
     strcpy(ll.serialPort, serialPort);
     if (strcmp("tx", role) == 0)
         ll.role = LlTx;
@@ -22,6 +23,10 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
     ll.nRetransmissions = nTries;
     ll.timeout = timeout;
     fd = llopen(ll);
+    if (fd == -1) {
+        printf("llopen failed\n");
+        return;
+    }
 
     // llclose
     llclose(fd);

@@ -1,7 +1,7 @@
 // Auxiliary file header.
 
-#ifndef _AUX_H_
-#define _AUX_H_
+#ifndef _LL_AUX_H_
+#define _LL_AUX_H_
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -30,12 +30,11 @@ void alarmHandlerInstaller();
 /**
  * Function to open the file descriptor through which to execute the serial port communications,
  * in the non-canonical mode, according to the serial port file transfer protocol
- * @param connectionParameters linklayer struct including info such as port
  * @param vtime Value to be assigned to the VTIME field of the new settings - time between bytes read
  * @param vmin Value to be assigned to the VMIN field of the new settings - minimum amount of bytes to read
  * @return File descriptor that was opened with the given port
  */
-int openNonCanonical(LinkLayer connectionParameters, int vtime, int vmin);
+int openNonCanonical(int vtime, int vmin);
 
 /**
  * Function to open the file descriptor through which to execute the serial port communications,
@@ -123,20 +122,17 @@ int sendFrame(unsigned char* frame, int fd, int length);
 int readByte(unsigned char* byte, int fd);
 
 /**
- * Function to create and handle a state machine as transmitter 
- * @param connectionParameters linklayer struct including info such as port
- * @param fd File descriptor from which to read the byte
- * @return 0 if successful; negative if an error occurs
+ * Opens the connection for the receiver
+ * @param fd File descriptor for the serial port
+ * @return File descriptor; -1 in case of error
  */
-int stateMachineTx(LinkLayer connectionParameters, int fd);
-
+int llOpenReceiver(int fd);
 
 /**
- * Function to create and handle a state machine as receiver
- * @param connectionParameters linklayer struct including info such as port
- * @param fd File descriptor from which to read the byte
- * @return 0 if successful; negative if an error occurs
+ * Opens the connection for the transmitter
+ * @param fd File descriptor for the serial port
+ * @return File descriptor; -1 in case of error
  */
-int stateMachineRx(LinkLayer connectionParameters, int fd);
+int llOpenTransmitter(int fd);
 
-#endif // _AUX_H_
+#endif // _LL_AUX_H_

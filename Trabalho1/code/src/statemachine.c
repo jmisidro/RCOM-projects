@@ -7,7 +7,7 @@
 #include <string.h>
 #include <strings.h>
 #include <unistd.h>
-#include "aux.h"
+#include "ll_aux.h"
 #include "statemachine.h"
 #include "macros.h"
 

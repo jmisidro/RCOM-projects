@@ -1,7 +1,7 @@
 // Link layer protocol implementation
 
 #include "macros.h"
-#include "aux.h"
+#include "ll_aux.h"
 #include "link_layer.h"
 
 ////////////////////////////////////////////////
@@ -9,20 +9,40 @@
 ////////////////////////////////////////////////
 int llopen(LinkLayer connectionParameters)
 {
-    int fd;
+    int fd, returnFd;
 
     printf("Opening connection...\n");
     // Open non canonical connection
-    if ( (fd = openNonCanonical(connectionParameters, VTIME_VALUE, VMIN_VALUE)) == -1)
+    if ( (fd = openNonCanonical(VTIME_VALUE, VMIN_VALUE)) == -1)
         return -1;
 
-    // Run state machine to ensure the establishment phase
-    if(connectionParameters.role == LlTx)
-        stateMachineTx(connectionParameters, fd);
-    else if(connectionParameters.role == LlRx)
-        stateMachineRx(connectionParameters, fd);
+    // installs alarm handler
+    alarmHandlerInstaller();
 
-    return fd;
+    if (connectionParameters.role == LlTx) // Transmitter
+    {
+        returnFd = llOpenTransmitter(fd);
+        if (returnFd < 0) {
+            llclose(fd);
+            return -1;
+        }
+        else 
+            return returnFd;
+    }
+    else if (connectionParameters.role == LlRx) // Receiver
+    {
+        returnFd = llOpenReceiver(fd);
+        if (returnFd < 0) { 
+            llclose(fd);
+            return -1;
+        }
+        else 
+            return returnFd;
+    }
+
+    perror("Invalid role");
+    llclose(fd);
+    return -1;
 }
 
 ////////////////////////////////////////////////
