@@ -135,4 +135,18 @@ int llOpenReceiver(int fd);
  */
 int llOpenTransmitter(int fd);
 
+/**
+ * Closes the connection for the transmitter
+ * @param fd File descriptor for the serial port
+ * @return Positive value when sucess; negative value when error
+ */
+int llCloseTransmitter(int fd);
+
+/**
+ * Closes the connection for the receiver
+ * @param fd File descriptor for the serial port
+ * @return Positive value when sucess; negative value when error
+ */
+int llCloseReceiver(int fd);
+
 #endif // _LL_AUX_H_

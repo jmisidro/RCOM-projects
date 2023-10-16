@@ -12,14 +12,14 @@ int finish, num_retr, resendFrame;
  */
 void alarmHandler(int signal) {
 
-  if(num_retr < ll.nRetransmissions){
+  if (num_retr < ll.nRetransmissions) {
     resendFrame = TRUE;
     printf("Alarm: Timeout, Sending frame again... (Number of retransmissions: %d)\n", num_retr+1);
     alarm(ll.timeout);
     num_retr++;
 
   }
-  else{
+  else {
     printf("Alarm: Number of retransmissions exceeded\n");
     finish = TRUE;
   }
@@ -125,19 +125,19 @@ int createSupervisionFrame(unsigned char* frame, unsigned char controlField, int
     frame[0] = FLAG;
 
     if(role == LlTx) {
-        if(controlField == SET) {
+        if(controlField == SET || controlField == DISC) {
             frame[1] = END_SEND;
         }
-        else if(controlField == UA ) {
+        else if(controlField == UA || controlField == RR_0 || controlField == REJ_0 || controlField == RR_1 || controlField == REJ_1 ) {
             frame[1] = END_REC;
         }
         else return -1;
     }
     else if(role == LlRx) {
-        if(controlField == SET ) {
+        if(controlField == SET || controlField == DISC) {
             frame[1] = END_REC;
         }
-        else if(controlField == UA ) {
+        else if(controlField == UA || controlField == RR_0 || controlField == REJ_0 || controlField == RR_1 || controlField == REJ_1 ) {
             frame[1] = END_SEND;
         }
         else return -1;
@@ -219,7 +219,7 @@ int readInformationFrame(unsigned char* frame, int fd, unsigned char* expectedBy
 
 
 int sendFrame(unsigned char* frame, int fd, int length) {
-    if( (write(fd, frame, length)) <= 0){
+    if( (write(fd, frame, length)) <= 0) {
         return -1;
     }
 
@@ -241,7 +241,7 @@ int llOpenReceiver(int fd)
   if (readSupervisionFrame(frame, fd, expectedByte, 1, END_SEND) == -1)
     return -1;
 
-  printf("Received SET frame\n");
+  printf("llopen: Received SET frame\n");
 
   if (createSupervisionFrame(frame, UA, LlRx) != 0)
     return -1;
@@ -251,7 +251,7 @@ int llOpenReceiver(int fd)
   if (sendFrame(frame, fd, sizeof(frame)) == -1)
     return -1;
 
-  printf("Sent UA frame\n");
+  printf("llopen: Sent UA frame\n");
 
   return fd;
 }
@@ -270,8 +270,121 @@ int llOpenTransmitter(int fd)
   if (sendFrame(frame, fd, sizeof(frame)) == -1)
     return -1;
 
-  printf("Sent SET frame\n");
+  printf("llopen: Sent SET frame\n");
 
+  int read_value = -1;
+  finish = 0;
+  num_retr = 0;
+  resendFrame = FALSE;
+
+  // Sets alarm
+  alarm(ll.timeout);
+
+  unsigned char expectedByte[1];
+  expectedByte[0] = UA;
+
+  while (finish != 1) {
+    read_value = readSupervisionFrame(responseBuffer, fd, expectedByte, 1, END_SEND);
+    if (resendFrame) {
+      sendFrame(frame, fd, sizeof(frame));
+      resendFrame = FALSE;
+    }
+
+    if (read_value >= 0) {
+      // Cancels alarm
+      alarm(0);
+      finish = 1;
+    }
+  }
+
+  if (read_value == -1) {
+    printf("Closing file descriptor\n");
+    return -1;
+  }
+
+  printf("llopen: Received UA frame\n");
+
+  return fd;
+}
+
+int llCloseTransmitter(int fd)
+{
+  unsigned char frame[BUF_SIZE_SUP], responseBuffer[BUF_SIZE_SUP], expectedByte[1];
+
+  // creates DISC frame
+  if (createSupervisionFrame(frame, DISC, LlTx) != 0)
+    return -1;
+
+  // send DISC frame to receiver
+  if (sendFrame(frame, fd, sizeof(frame)) == -1)
+    return -1;
+
+  printf("Sent DISC frame\n");
+
+  int read_value = -1;
+  finish = 0;
+  num_retr = 0;
+  resendFrame = FALSE;
+
+  // Sets alarm
+  alarm(ll.timeout);
+
+  expectedByte[0] = DISC;
+
+  while (finish != 1) {
+    read_value = readSupervisionFrame(responseBuffer, fd, expectedByte, 1, END_REC);
+
+    if (resendFrame) {
+      sendFrame(frame, fd, sizeof(frame));
+      resendFrame = FALSE;
+    }
+
+    if (read_value >= 0) {
+      // Cancels alarm
+      alarm(0);
+      finish = 1;
+    }
+  }
+
+  if (read_value == -1) {
+    printf("Closing file descriptor\n");
+    return -1;
+  }
+
+  printf("llclose: Received DISC frame\n");
+
+  // creates UA frame
+  if (createSupervisionFrame(frame, UA, LlTx) != 0)
+    return -1;
+
+  // send DISC frame to receiver
+  if (sendFrame(frame, fd, sizeof(frame)) == -1)
+    return -1;
+
+  printf("llclose: Sent UA frame\n");
+
+  return 0;
+}
+
+int llCloseReceiver(int fd)
+{
+  unsigned char frame[BUF_SIZE_SUP], responseBuffer[BUF_SIZE_SUP], expectedByte[1];
+  expectedByte[0] = DISC;
+
+  if (readSupervisionFrame(frame, fd, expectedByte, 1, END_SEND) == -1)
+    return -1;
+
+  printf("llclose: Received DISC frame\n");
+
+  // creates DISC frame
+  if (createSupervisionFrame(frame, DISC, LlRx) != 0)
+    return -1;
+
+  // send DISC frame to receiver
+  if (sendFrame(frame, fd, sizeof(frame)) == -1)
+    return -1;
+
+  printf("llclose: Sent DISC frame\n");
 
   int read_value = -1;
   finish = 0;
@@ -280,12 +393,11 @@ int llOpenTransmitter(int fd)
 
   alarm(ll.timeout);
 
-  unsigned char expectedByte[1];
   expectedByte[0] = UA;
 
-  while (finish != 1)
-  {
-    read_value = readSupervisionFrame(responseBuffer, fd, expectedByte, 1, END_SEND);
+  while (finish != 1) {
+    read_value = readSupervisionFrame(responseBuffer, fd, expectedByte, 1, END_REC);
+
     if (resendFrame)
     {
       sendFrame(frame, fd, sizeof(frame));
@@ -300,13 +412,12 @@ int llOpenTransmitter(int fd)
     }
   }
 
-  if (read_value == -1)
-  {
+  if (read_value == -1) {
     printf("Closing file descriptor\n");
     return -1;
   }
 
-  printf("Received UA frame\n");
+  printf("llclose: Received UA frame\n");
 
-  return fd;
+  return 0;
 }

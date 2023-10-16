@@ -27,7 +27,14 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
         printf("llopen failed\n");
         return;
     }
+    else 
+        printf("------ llopen complete ------\n");
 
     // llclose
-    llclose(fd);
+    if (llclose(fd) == -1) {
+        printf("llclose failed\n");
+        return;
+    }
+    else if (llclose(fd) == 1) 
+        printf("------ llclose complete ------\n");
 }
