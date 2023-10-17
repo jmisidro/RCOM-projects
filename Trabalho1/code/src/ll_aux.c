@@ -4,6 +4,7 @@
 // global variables
 // finish - TRUE when the alarm has completed all retransmissions so we close the connection
 // num_retr - current number of retransmissions
+// resendFrame - boolean to determine whether to resend a frame or not based on the alarm
 int finish, num_retr, resendFrame;
 
 /**
@@ -103,8 +104,6 @@ int closeNonCanonical(struct termios oldtio, int fd) {
     return 1;
 }
 
-
-
 unsigned char createBCC(unsigned char a, unsigned char c) {
     return a ^ c;
 }
@@ -120,25 +119,92 @@ unsigned char createBCC_2(unsigned char* frame, int length) {
   return bcc2;
 }
 
+int byteStuffing(unsigned char* frame, int length) {
+
+    // allocates space for aux buffer (length of the packet + 6 bytes for the frame header and tail)
+    unsigned char aux[length + 6];
+
+    // transfers info from the frame to aux
+    for(int i = 0; i < length + 6 ; i++){
+      aux[i] = frame[i];
+    }
+    
+    int finalLength = DATA_START;
+    // parses aux buffer, and fills in correctly the frame buffer
+    for(int i = DATA_START; i < (length + 6); i++){
+
+      if(aux[i] == FLAG && i != (length + 5)) {
+        frame[finalLength] = ESCAPE_BYTE;
+        frame[finalLength+1] = BYTE_STUFFING_FLAG;
+        finalLength = finalLength + 2;
+      }
+      else if(aux[i] == ESCAPE_BYTE && i != (length + 5)) {
+        frame[finalLength] = ESCAPE_BYTE;
+        frame[finalLength+1] = BYTE_STUFFING_ESCAPE;
+        finalLength = finalLength + 2;
+      }
+      else{
+        frame[finalLength] = aux[i];
+        finalLength++;
+      }
+    }
+
+    return finalLength;
+}
+
+int byteDestuffing(unsigned char* frame, int length) {
+
+  // allocates space for the max possible frame length read (length of the data packet + bcc2, already with stuffing, plus the other 5 bytes in the frame)
+  unsigned char aux[length + 5];
+
+  // copies the content of the frame (with stuffing) to the aux frame
+  for(int i = 0; i < (length + 5) ; i++) {
+    aux[i] = frame[i];
+  }
+
+  int finalLength = DATA_START;
+
+  // iterates through the aux buffer, and fills the frame buffer with destuffed content
+  for(int i = DATA_START; i < (length + 5); i++) {
+
+    if(aux[i] == ESCAPE_BYTE){
+      if (aux[i+1] == BYTE_STUFFING_ESCAPE) {
+        frame[finalLength] = ESCAPE_BYTE;
+      }
+      else if(aux[i+1] == BYTE_STUFFING_FLAG) {
+        frame[finalLength] = FLAG;
+      }
+      i++;
+      finalLength++;
+    }
+    else{
+      frame[finalLength] = aux[i];
+      finalLength++;
+    }
+  }
+
+  return finalLength;
+}
+
 int createSupervisionFrame(unsigned char* frame, unsigned char controlField, int role) {
 
     frame[0] = FLAG;
 
     if(role == LlTx) {
         if(controlField == SET || controlField == DISC) {
-            frame[1] = END_SEND;
+          frame[1] = END_SEND;
         }
         else if(controlField == UA || controlField == RR_0 || controlField == REJ_0 || controlField == RR_1 || controlField == REJ_1 ) {
-            frame[1] = END_REC;
+          frame[1] = END_REC;
         }
         else return -1;
     }
     else if(role == LlRx) {
         if(controlField == SET || controlField == DISC) {
-            frame[1] = END_REC;
+          frame[1] = END_REC;
         }
         else if(controlField == UA || controlField == RR_0 || controlField == REJ_0 || controlField == RR_1 || controlField == REJ_1 ) {
-            frame[1] = END_SEND;
+          frame[1] = END_SEND;
         }
         else return -1;
     }
@@ -182,8 +248,8 @@ int readSupervisionFrame(unsigned char* frame, int fd, unsigned char* expectedBy
     unsigned char byte;
 
     while(st->state != STOP && !finish && !resendFrame) {
-        if(readByte(&byte, fd) == 0)
-            event_handler(st, byte, frame, SUPERVISION);
+      if(readByte(&byte, fd) == 0)
+        event_handler(st, byte, frame, SUPERVISION);
     }
 
     int ret = st->foundIndex;
@@ -204,8 +270,8 @@ int readInformationFrame(unsigned char* frame, int fd, unsigned char* expectedBy
     unsigned char byte;
 
     while(st->state != STOP) {
-        if(readByte(&byte, fd) == 0)
-            event_handler(st, byte, frame, INFORMATION);
+      if(readByte(&byte, fd) == 0)
+        event_handler(st, byte, frame, INFORMATION);
     }
 
     // dataLength = length of the data packet sent from the application on the transmitter side
@@ -220,7 +286,7 @@ int readInformationFrame(unsigned char* frame, int fd, unsigned char* expectedBy
 
 int sendFrame(unsigned char* frame, int fd, int length) {
     if( (write(fd, frame, length)) <= 0) {
-        return -1;
+      return -1;
     }
 
     return 1;
@@ -229,7 +295,7 @@ int sendFrame(unsigned char* frame, int fd, int length) {
 int readByte(unsigned char* byte, int fd) {
 
     if(read(fd, byte, sizeof(unsigned char)) <= 0)
-        return -1;
+      return -1;
 
     return 0;
 }
@@ -290,6 +356,7 @@ int llOpenTransmitter(int fd)
       resendFrame = FALSE;
     }
 
+    // read_value contains the index the expectedByte found by the state machine if it succeeds, else -1
     if (read_value >= 0) {
       // Cancels alarm
       alarm(0);
@@ -339,6 +406,7 @@ int llCloseTransmitter(int fd)
       resendFrame = FALSE;
     }
 
+    // read_value contains the index the expectedByte found by the state machine if it succeeds, else -1
     if (read_value >= 0) {
       // Cancels alarm
       alarm(0);
@@ -404,6 +472,7 @@ int llCloseReceiver(int fd)
       resendFrame = FALSE;
     }
 
+    // read_value contains the index the expectedByte found by the state machine if it succeeds, else -1
     if (read_value >= 0)
     {
       // Cancels alarm
