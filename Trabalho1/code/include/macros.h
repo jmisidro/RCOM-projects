@@ -2,7 +2,7 @@
 #define _MACROS_H_
 
 // ---- macros for data link layer ----
-
+#define BUF_SIZE_MAX    20 // size of a supervision frame
 #define BUF_SIZE_SUP    5 // size of a supervision frame
 
 #define BAUDRATE 9600 //38400 is the normal value

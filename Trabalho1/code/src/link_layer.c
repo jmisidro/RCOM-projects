@@ -1,7 +1,5 @@
 // Link layer protocol implementation
 
-#include "macros.h"
-#include "ll_aux.h"
 #include "link_layer.h"
 
 ////////////////////////////////////////////////

@@ -10,9 +10,7 @@
 void applicationLayer(const char *serialPort, const char *role, int baudRate,
                       int nTries, int timeout, const char *filename)
 {
-    // llopen
-    int fd;
-
+    /* llopen */
     // store linklayer info in ll struct
     strcpy(ll.serialPort, serialPort);
     if (strcmp("tx", role) == 0)
@@ -22,19 +20,19 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
     ll.baudRate = baudRate;
     ll.nRetransmissions = nTries;
     ll.timeout = timeout;
-    fd = llopen(ll);
-    if (fd == -1) {
-        printf("llopen failed\n");
+    al.fileDescriptor = llopen(ll);
+    if (al.fileDescriptor == -1) {
+        printf("\nxxxxxx llopen failed xxxxxx\n\n");
         return;
     }
     else 
-        printf("------ llopen complete ------\n");
+        printf("\n------ llopen complete ------\n\n");
 
-    // llclose
-    if (llclose(fd) == -1) {
-        printf("llclose failed\n");
+    /* llclose */ 
+    if (llclose(al.fileDescriptor) == -1) {
+        printf("\nxxxxxx llclose failed xxxxxx\n\n");
         return;
     }
     else
-        printf("------ llclose complete ------\n");
+        printf("\n------ llclose complete ------\n\n");
 }

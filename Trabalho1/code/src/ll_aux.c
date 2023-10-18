@@ -302,19 +302,21 @@ int readByte(unsigned char* byte, int fd) {
 
 int llOpenReceiver(int fd)
 {
-  unsigned char frame[BUF_SIZE_SUP], expectedByte[1];
+  unsigned char expectedByte[1];
+  ll.frame_length = BUF_SIZE_SUP;
   expectedByte[0] = SET;
-  if (readSupervisionFrame(frame, fd, expectedByte, 1, END_SEND) == -1)
+
+  if (readSupervisionFrame(ll.frame, fd, expectedByte, 1, END_SEND) == -1)
     return -1;
 
   printf("llopen: Received SET frame\n");
 
-  if (createSupervisionFrame(frame, UA, LlRx) != 0)
+  if (createSupervisionFrame(ll.frame, UA, LlRx) != 0)
     return -1;
 
 
   // send SET frame to receiver
-  if (sendFrame(frame, fd, sizeof(frame)) == -1)
+  if (sendFrame(ll.frame, fd, ll.frame_length) == -1)
     return -1;
 
   printf("llopen: Sent UA frame\n");
@@ -324,16 +326,16 @@ int llOpenReceiver(int fd)
 
 int llOpenTransmitter(int fd)
 {
-  unsigned char frame[BUF_SIZE_SUP], responseBuffer[BUF_SIZE_SUP]; // buffer to read the response 
-
+  unsigned char responseBuffer[BUF_SIZE_SUP]; // buffer to read the response 
+  ll.frame_length = BUF_SIZE_SUP;
 
   // creates SET frame
-  if (createSupervisionFrame(frame, SET, LlTx) != 0)
+  if (createSupervisionFrame(ll.frame, SET, LlTx) != 0)
     return -1;
 
 
   // send SET frame to receiver
-  if (sendFrame(frame, fd, sizeof(frame)) == -1)
+  if (sendFrame(ll.frame, fd, ll.frame_length) == -1)
     return -1;
 
   printf("llopen: Sent SET frame\n");
@@ -352,7 +354,7 @@ int llOpenTransmitter(int fd)
   while (finish != 1) {
     read_value = readSupervisionFrame(responseBuffer, fd, expectedByte, 1, END_SEND);
     if (resendFrame) {
-      sendFrame(frame, fd, sizeof(frame));
+      sendFrame(ll.frame, fd, ll.frame_length);
       resendFrame = FALSE;
     }
 
@@ -376,14 +378,15 @@ int llOpenTransmitter(int fd)
 
 int llCloseTransmitter(int fd)
 {
-  unsigned char frame[BUF_SIZE_SUP], responseBuffer[BUF_SIZE_SUP], expectedByte[1];
+  unsigned char responseBuffer[BUF_SIZE_SUP], expectedByte[1];
+  ll.frame_length = BUF_SIZE_SUP;
 
   // creates DISC frame
-  if (createSupervisionFrame(frame, DISC, LlTx) != 0)
+  if (createSupervisionFrame(ll.frame, DISC, LlTx) != 0)
     return -1;
 
   // send DISC frame to receiver
-  if (sendFrame(frame, fd, sizeof(frame)) == -1)
+  if (sendFrame(ll.frame, fd, ll.frame_length) == -1)
     return -1;
 
   printf("Sent DISC frame\n");
@@ -402,7 +405,7 @@ int llCloseTransmitter(int fd)
     read_value = readSupervisionFrame(responseBuffer, fd, expectedByte, 1, END_REC);
 
     if (resendFrame) {
-      sendFrame(frame, fd, sizeof(frame));
+      sendFrame(ll.frame, fd, ll.frame_length);
       resendFrame = FALSE;
     }
 
@@ -422,11 +425,11 @@ int llCloseTransmitter(int fd)
   printf("llclose: Received DISC frame\n");
 
   // creates UA frame
-  if (createSupervisionFrame(frame, UA, LlTx) != 0)
+  if (createSupervisionFrame(ll.frame, UA, LlTx) != 0)
     return -1;
 
   // send DISC frame to receiver
-  if (sendFrame(frame, fd, sizeof(frame)) == -1)
+  if (sendFrame(ll.frame, fd, ll.frame_length) == -1)
     return -1;
 
   printf("llclose: Sent UA frame\n");
@@ -436,20 +439,21 @@ int llCloseTransmitter(int fd)
 
 int llCloseReceiver(int fd)
 {
-  unsigned char frame[BUF_SIZE_SUP], responseBuffer[BUF_SIZE_SUP], expectedByte[1];
+  unsigned char responseBuffer[BUF_SIZE_SUP], expectedByte[1];
+  ll.frame_length = BUF_SIZE_SUP;
   expectedByte[0] = DISC;
 
-  if (readSupervisionFrame(frame, fd, expectedByte, 1, END_SEND) == -1)
+  if (readSupervisionFrame(ll.frame, fd, expectedByte, 1, END_SEND) == -1)
     return -1;
 
   printf("llclose: Received DISC frame\n");
 
   // creates DISC frame
-  if (createSupervisionFrame(frame, DISC, LlRx) != 0)
+  if (createSupervisionFrame(ll.frame, DISC, LlRx) != 0)
     return -1;
 
   // send DISC frame to receiver
-  if (sendFrame(frame, fd, sizeof(frame)) == -1)
+  if (sendFrame(ll.frame, fd, ll.frame_length) == -1)
     return -1;
 
   printf("llclose: Sent DISC frame\n");
@@ -468,7 +472,7 @@ int llCloseReceiver(int fd)
 
     if (resendFrame)
     {
-      sendFrame(frame, fd, sizeof(frame));
+      sendFrame(ll.frame, fd, ll.frame_length);
       resendFrame = FALSE;
     }
 

@@ -5,20 +5,24 @@
 #define _LINK_LAYER_H_
 
 #include <termios.h>
+#include "macros.h"
+#include "ll_aux.h"
 
 typedef enum
 {
-    LlTx,
-    LlRx,
+    LlTx, /* Transmitter */
+    LlRx, /* Receiver */
 } LinkLayerRole;
 
 typedef struct
 {
-    char serialPort[50];
-    LinkLayerRole role;
-    int baudRate;
-    int nRetransmissions;
-    int timeout;
+    char serialPort[50]; /* Dispositivo /dev/ttySx, x = 0, 1 */
+    LinkLayerRole role; /*  papel desempenhado na transmissão: Transmitter ou Receiver */
+    int baudRate; /* Velocidade de transmissão */
+    int nRetransmissions;/* Número de tentativas em caso de falha */
+    int timeout; /* Valor do temporizador em segundos */
+    unsigned char frame[BUF_SIZE_MAX]; /* Trama */
+    int frame_length; /* Tamanho atual da trama */
 } LinkLayer;
 
 // global variables
