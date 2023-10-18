@@ -132,12 +132,13 @@ int byteStuffing(unsigned char* frame, int length) {
     int finalLength = DATA_START;
     // parses aux buffer, and fills in correctly the frame buffer
     for(int i = DATA_START; i < (length + 6); i++){
-
+      // If the octet 0x7E (FLAG) occurs inside the frame, the octet is replaced by the sequence: 0x7D 0x5E (ESCAPE_BYTE BYTE_STUFFING_FLAG)
       if(aux[i] == FLAG && i != (length + 5)) {
         frame[finalLength] = ESCAPE_BYTE;
         frame[finalLength+1] = BYTE_STUFFING_FLAG;
         finalLength = finalLength + 2;
       }
+      // If the octet 0x7D (ESCAPE_BYTE) occurs inside the frame, the octet is replaced by the sequence: 0x7D 0x5D (ESCAPE_BYTE BYTE_STUFFING_ESCAPE)
       else if(aux[i] == ESCAPE_BYTE && i != (length + 5)) {
         frame[finalLength] = ESCAPE_BYTE;
         frame[finalLength+1] = BYTE_STUFFING_ESCAPE;
@@ -168,9 +169,11 @@ int byteDestuffing(unsigned char* frame, int length) {
   for(int i = DATA_START; i < (length + 5); i++) {
 
     if(aux[i] == ESCAPE_BYTE){
+      // If the octet 0x5D (BYTE_STUFFING_ESCAPE) occurs inside the frame, the octet is replaced by the escape byte: 0x7D
       if (aux[i+1] == BYTE_STUFFING_ESCAPE) {
         frame[finalLength] = ESCAPE_BYTE;
       }
+      // If the octet 0x5E (BYTE_STUFFING_FLAG) occurs inside the frame, the octet is replaced by the flag: 0x7E
       else if(aux[i+1] == BYTE_STUFFING_FLAG) {
         frame[finalLength] = FLAG;
       }
@@ -274,8 +277,7 @@ int readInformationFrame(unsigned char* frame, int fd, unsigned char* expectedBy
         event_handler(st, byte, frame, INFORMATION);
     }
 
-    // dataLength = length of the data packet sent from the application on the transmitter side
-    //              (includes data packet + bcc2, with stuffing)
+    // dataLength = length of the data packet sent from the application on the transmitter side (includes data packet + bcc2, with stuffing)
     int ret = st->dataLength;
 
     destroy_st(st);
@@ -326,7 +328,7 @@ int llOpenReceiver(int fd)
 
 int llOpenTransmitter(int fd)
 {
-  unsigned char responseBuffer[BUF_SIZE_SUP]; // buffer to read the response 
+  unsigned char responseBuffer[BUF_SIZE_SUP];
   ll.frame_length = BUF_SIZE_SUP;
 
   // creates SET frame
@@ -367,7 +369,7 @@ int llOpenTransmitter(int fd)
   }
 
   if (read_value == -1) {
-    printf("Closing file descriptor\n");
+    printf("llopen: Closing file descriptor\n");
     return -1;
   }
 
@@ -389,7 +391,7 @@ int llCloseTransmitter(int fd)
   if (sendFrame(ll.frame, fd, ll.frame_length) == -1)
     return -1;
 
-  printf("Sent DISC frame\n");
+  printf("llclose: Sent DISC frame\n");
 
   int read_value = -1;
   finish = 0;
@@ -418,7 +420,7 @@ int llCloseTransmitter(int fd)
   }
 
   if (read_value == -1) {
-    printf("Closing file descriptor\n");
+    printf("llclose: Closing file descriptor\n");
     return -1;
   }
 
@@ -486,7 +488,7 @@ int llCloseReceiver(int fd)
   }
 
   if (read_value == -1) {
-    printf("Closing file descriptor\n");
+    printf("llclose: Closing file descriptor\n");
     return -1;
   }
 

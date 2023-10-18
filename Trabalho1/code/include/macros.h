@@ -17,30 +17,30 @@
 #define FALSE 0
 #define TRUE 1
 
-#define N_TRIES 3
-#define TIMEOUT 4
+#define N_TRIES 3 // Number of tries before the alarm stops
+#define TIMEOUT 4 // Timeout for the alarm
 
-#define SUPERVISION 0
-#define INFORMATION 1
+#define SUPERVISION 0 // Supervision frame
+#define INFORMATION 1 // Information frame
 
-#define FLAG     0x7E
-#define END_SEND 0x03
-#define END_REC  0x01
-#define S_0      0x00
-#define S_1      0x40
-#define SET      0x03 // set up
-#define DISC     0x0B // disconnect
-#define UA       0x07 // unnumbered acknowledgment
-#define RR_0     0X05 // Receive Ready / positive ACK for number 0
-#define RR_1     0x85 // Receive Ready / positive ACK for number 1 --> R 0 0 0 0 1 0 1 -- R = N(r)
-#define REJ_0    0x01 // Reject / positive ACK for number 0
-#define REJ_1    0x81 // Reject / negative ACK for number 1 --> R 0 0 0 0 0 0 1 -- R = N(r)
+#define FLAG     0x7E // Synchronisation: start or end of frame
+#define END_SEND 0x03 // Address field in frames that are commands sent by the Transmitter or replies sent by theReceiver
+#define END_REC  0x01 // Address field in frames that are commands sent by the Receiver or replies sent by the Transmitter
+#define I_0      0x00 // Information frame number 0
+#define I_1      0x40 // Information frame number 1
+#define SET      0x03 // Set Up --> sent by the transmitter to initiate a connection
+#define DISC     0x0B // Disconnect --> indicate the termination of a connection
+#define UA       0x07 // Unnumbered Acknowledgment --> confirmation to the reception of a valid supervision frame
+#define RR_0     0X05 // Receive Ready for number 0 --> indication sent by the Receiver that it is ready to receive an information frame number 0
+#define RR_1     0x85 // Receive Ready for number 0 --> indication sent by the Receiver that it is ready to receive an information frame number 1
+#define REJ_0    0x01 // Reject --> indication sent by the Receiver that it rejects an information frame number 0
+#define REJ_1    0x81 // Reject --> indication sent by the Receiver that it rejects an information frame number 1
 #define VTIME_VALUE    0
 #define VMIN_VALUE     0
 
 #define BYTE_STUFFING_ESCAPE 0x5D
 #define BYTE_STUFFING_FLAG 0x5E
-#define ESCAPE_BYTE 0x7D
+#define ESCAPE_BYTE 0x7D // escape octet
 
 #define DATA_START    4
 

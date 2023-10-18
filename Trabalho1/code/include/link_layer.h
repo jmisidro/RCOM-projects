@@ -17,12 +17,14 @@ typedef enum
 typedef struct
 {
     char serialPort[50]; /* Dispositivo /dev/ttySx, x = 0, 1 */
-    LinkLayerRole role; /*  papel desempenhado na transmissão: Transmitter ou Receiver */
+    LinkLayerRole role; /*  Papel desempenhado na transmissão: Transmitter ou Receiver */
     int baudRate; /* Velocidade de transmissão */
-    int nRetransmissions;/* Número de tentativas em caso de falha */
-    int timeout; /* Valor do temporizador em segundos */
+    unsigned int nRetransmissions;/* Número de tentativas em caso de erro */
+    unsigned int timeout; /* Valor do temporizador em segundos */
     unsigned char frame[MAX_SIZE_FRAME]; /* Trama */
-    int frame_length; /* Tamanho atual da trama */
+    unsigned int frame_length; /* Tamanho atual da trama */
+    unsigned int sequenceNumber; /* Número de sequência da trama: 0, 1 */
+
 } LinkLayer;
 
 // global variables
