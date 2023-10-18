@@ -37,7 +37,7 @@ int llopen(LinkLayer connectionParameters)
             return -1;
         }
         else
-            return fd;
+            return returnFd;
     }
 
     perror("Invalid role");

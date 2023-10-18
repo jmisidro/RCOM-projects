@@ -35,6 +35,6 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
         printf("llclose failed\n");
         return;
     }
-    else if (llclose(fd) == 1) 
+    else
         printf("------ llclose complete ------\n");
 }
