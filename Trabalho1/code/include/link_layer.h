@@ -43,9 +43,9 @@ struct termios oldtio;
 // Return "1" on success or "-1" on error.
 int llopen(LinkLayer connectionParameters);
 
-// Send data in buf with size bufSize.
+// Send data in buffer with size length.
 // Return number of chars written, or "-1" on error.
-int llwrite(int fd, const unsigned char *buf, int bufSize);
+int llwrite(int fd, unsigned char *buffer, int length);
 
 // Receive data in packet.
 // Return number of chars read, or "-1" on error.

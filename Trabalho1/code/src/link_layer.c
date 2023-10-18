@@ -46,7 +46,7 @@ int llopen(LinkLayer connectionParameters)
 ////////////////////////////////////////////////
 // LLWRITE
 ////////////////////////////////////////////////
-int llwrite(int fd, const unsigned char *buf, int bufSize)
+int llwrite(int fd, unsigned char *buffer, int length)
 {
     unsigned char responseBuffer[BUF_SIZE_SUP]; // buffer to receive the response
     unsigned char controlByte; // controlByte --> information frame number 
@@ -56,14 +56,14 @@ int llwrite(int fd, const unsigned char *buf, int bufSize)
     else
         controlByte = I_1;
 
-    if (createInformationFrame(ll.frame, controlByte, buf, bufSize) != 0) {
+    if (createInformationFrame(ll.frame, controlByte, buffer, length) != 0) {
         closeNonCanonical(oldtio, fd);
         return -1;
     }
 
     int fullLength; // frame length after stuffing
 
-    if ((fullLength = byteStuffing(ll.frame, bufSize)) < 0) {
+    if ((fullLength = byteStuffing(ll.frame, length)) < 0) {
         closeNonCanonical(oldtio, fd);
         return -1;
     }
