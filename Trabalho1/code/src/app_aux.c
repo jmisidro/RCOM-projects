@@ -8,8 +8,8 @@ int buildDataPacket(unsigned char *packetBuffer, int sequenceNumber, unsigned ch
 
     int l1, l2;
     // number of octets (K = 256 * L2 + L1) in the data field
-    *l1 = dataLength % 256;
-    *l2 = dataLength / 256;
+    l1 = dataLength % 256;
+    l2 = dataLength / 256;
 
     packetBuffer[2] = (unsigned char)l2;
 

@@ -56,7 +56,7 @@ int llwrite(int fd, const unsigned char *buf, int bufSize)
     else
         controlByte = I_1;
 
-    if (createInformationFrame(ll.frame, controlByte, buffer, bufSize) != 0) {
+    if (createInformationFrame(ll.frame, controlByte, buf, bufSize) != 0) {
         closeNonCanonical(oldtio, fd);
         return -1;
     }
@@ -69,13 +69,13 @@ int llwrite(int fd, const unsigned char *buf, int bufSize)
     }
 
     ll.frame_length = fullLength;
-    int numWritten; // number of writen characters
+    int numBytesWritten; // number of bytes written
 
     int dataSent = FALSE; // indicates whether the data has been sent
 
     while (!dataSent)
     {
-        if ((numWritten = sendFrame(ll.frame, fd, ll.frame_length)) == -1) {
+        if ((numBytesWritten = sendFrame(ll.frame, fd, ll.frame_length)) == -1) {
             closeNonCanonical(oldtio, fd);
             return -1;
         }
@@ -106,7 +106,7 @@ int llwrite(int fd, const unsigned char *buf, int bufSize)
 
             if (resendFrame) {
                 sendFrame(ll.frame, fd, ll.frame_length);
-                resendFrame = false;
+                resendFrame = FALSE;
             }
 
             if (read_value >= 0) {
@@ -138,7 +138,7 @@ int llwrite(int fd, const unsigned char *buf, int bufSize)
         return -1;
 
 
-    return (numWritten - 6); // length of the data packet sent to the receiver
+    return (numBytesWritten - 6); // length of the data packet sent to the receiver
 }
 
 ////////////////////////////////////////////////
@@ -147,7 +147,7 @@ int llwrite(int fd, const unsigned char *buf, int bufSize)
 int llread(int fd, unsigned char *packet)
 {
 
-  int numBytes;
+  int numBytesRead; // number of bytes read
   unsigned char expectedBytes[2];
   expectedBytes[0] = I_0;
   expectedBytes[1] = I_1;
@@ -162,7 +162,7 @@ int llread(int fd, unsigned char *packet)
 
     printf("llread: Received I frame\n");
 
-    if ((numBytes = byteDestuffing(ll.frame, read_value)) < 0) {
+    if ((numBytesRead = byteDestuffing(ll.frame, read_value)) < 0) {
       closeNonCanonical(oldtio, fd);
       return -1;
     }
@@ -175,11 +175,11 @@ int llread(int fd, unsigned char *packet)
 
     unsigned char responseByte;
 
-    if (ll.frame[numBytes - 2] == createBCC_2(&ll.frame[DATA_START], numBytes - 6)) { // checks if bcc2 is correct
+    if (ll.frame[numBytesRead - 2] == createBCC_2(&ll.frame[DATA_START], numBytesRead - 6)) { // checks if bcc2 is correct
 
         if (controlByteRead == ll.sequenceNumber) { // Expected frame (sequence number matches the number in control byte)  
             // transfers information to the buffer
-            for (int i = 0; i < numBytes - 6; i++)
+            for (int i = 0; i < numBytesRead - 6; i++)
                 packet[i] = ll.frame[DATA_START + i];
 
             isBufferFull = TRUE;
@@ -241,7 +241,7 @@ int llread(int fd, unsigned char *packet)
 
   }
 
-  return (numBytes - 6); // number of bytes of the data packet read
+  return (numBytesRead - 6); // number of bytes of the data packet read
 }
 
 ////////////////////////////////////////////////
@@ -266,7 +266,7 @@ int llclose(int fd)
         return -1;
     }
 
-    // Open non canonical connection
+    // Close non canonical connection
     if (closeNonCanonical(oldtio, fd) == -1)
         return -1;
 

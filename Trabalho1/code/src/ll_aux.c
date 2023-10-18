@@ -1,12 +1,6 @@
 // Write to serial port in non-canonical mode
 #include "ll_aux.h"
 
-// global variables
-// finish - TRUE when the alarm has completed all retransmissions so we close the connection
-// num_retr - current number of retransmissions
-// resendFrame - boolean to determine whether to resend a frame or not based on the alarm
-int finish, num_retr, resendFrame;
-
 /**
  * Handles the alarm signal
  * @param signal Signal that is received
