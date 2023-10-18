@@ -343,7 +343,7 @@ int llOpenTransmitter(int fd)
   printf("llopen: Sent SET frame\n");
 
   int read_value = -1;
-  finish = 0;
+  finish = FALSE;
   num_retr = 0;
   resendFrame = FALSE;
 
@@ -353,18 +353,18 @@ int llOpenTransmitter(int fd)
   unsigned char expectedByte[1];
   expectedByte[0] = UA;
 
-  while (finish != 1) {
+  while (finish != TRUE) {
+    // read_value contains the index the expectedByte found by the state machine if it succeeds, else -1
     read_value = readSupervisionFrame(responseBuffer, fd, expectedByte, 1, END_SEND);
     if (resendFrame) {
       sendFrame(ll.frame, fd, ll.frame_length);
       resendFrame = FALSE;
     }
 
-    // read_value contains the index the expectedByte found by the state machine if it succeeds, else -1
     if (read_value >= 0) {
       // Cancels alarm
       alarm(0);
-      finish = 1;
+      finish = TRUE;
     }
   }
 
@@ -394,7 +394,7 @@ int llCloseTransmitter(int fd)
   printf("llclose: Sent DISC frame\n");
 
   int read_value = -1;
-  finish = 0;
+  finish = FALSE;
   num_retr = 0;
   resendFrame = FALSE;
 
@@ -403,7 +403,8 @@ int llCloseTransmitter(int fd)
 
   expectedByte[0] = DISC;
 
-  while (finish != 1) {
+  while (finish != TRUE) {
+    // read_value contains the index the expectedByte found by the state machine if it succeeds, else -1
     read_value = readSupervisionFrame(responseBuffer, fd, expectedByte, 1, END_REC);
 
     if (resendFrame) {
@@ -411,11 +412,10 @@ int llCloseTransmitter(int fd)
       resendFrame = FALSE;
     }
 
-    // read_value contains the index the expectedByte found by the state machine if it succeeds, else -1
     if (read_value >= 0) {
       // Cancels alarm
       alarm(0);
-      finish = 1;
+      finish = TRUE;
     }
   }
 
@@ -461,7 +461,7 @@ int llCloseReceiver(int fd)
   printf("llclose: Sent DISC frame\n");
 
   int read_value = -1;
-  finish = 0;
+  finish = FALSE;
   num_retr = 0;
   resendFrame = FALSE;
 
@@ -469,7 +469,9 @@ int llCloseReceiver(int fd)
 
   expectedByte[0] = UA;
 
-  while (finish != 1) {
+  while (finish != TRUE) {
+
+    // read_value contains the index the expectedByte found by the state machine if it succeeds, else -1
     read_value = readSupervisionFrame(responseBuffer, fd, expectedByte, 1, END_REC);
 
     if (resendFrame)
@@ -478,12 +480,11 @@ int llCloseReceiver(int fd)
       resendFrame = FALSE;
     }
 
-    // read_value contains the index the expectedByte found by the state machine if it succeeds, else -1
     if (read_value >= 0)
     {
       // Cancels alarm
       alarm(0);
-      finish = 1;
+      finish = TRUE;
     }
   }
 

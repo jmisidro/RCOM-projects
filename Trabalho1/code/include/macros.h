@@ -32,7 +32,7 @@
 #define DISC     0x0B // Disconnect --> indicate the termination of a connection
 #define UA       0x07 // Unnumbered Acknowledgment --> confirmation to the reception of a valid supervision frame
 #define RR_0     0X05 // Receive Ready for number 0 --> indication sent by the Receiver that it is ready to receive an information frame number 0
-#define RR_1     0x85 // Receive Ready for number 0 --> indication sent by the Receiver that it is ready to receive an information frame number 1
+#define RR_1     0x85 // Receive Ready for number 1 --> indication sent by the Receiver that it is ready to receive an information frame number 1
 #define REJ_0    0x01 // Reject --> indication sent by the Receiver that it rejects an information frame number 0
 #define REJ_1    0x81 // Reject --> indication sent by the Receiver that it rejects an information frame number 1
 #define VTIME_VALUE    0
