@@ -21,7 +21,7 @@ typedef struct
     int baudRate; /* Velocidade de transmissão */
     int nRetransmissions;/* Número de tentativas em caso de falha */
     int timeout; /* Valor do temporizador em segundos */
-    unsigned char frame[BUF_SIZE_MAX]; /* Trama */
+    unsigned char frame[MAX_SIZE_FRAME]; /* Trama */
     int frame_length; /* Tamanho atual da trama */
 } LinkLayer;
 

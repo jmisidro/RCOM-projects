@@ -20,6 +20,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
     ll.baudRate = baudRate;
     ll.nRetransmissions = nTries;
     ll.timeout = timeout;
+    // store file descriptor in application layer struct
     al.fileDescriptor = llopen(ll);
     if (al.fileDescriptor == -1) {
         printf("\nxxxxxx llopen failed xxxxxx\n\n");
