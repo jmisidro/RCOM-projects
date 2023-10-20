@@ -1,4 +1,4 @@
-// Auxiliary file header.
+// Link layer auxiliary file header.
 
 #ifndef _LL_AUX_H_
 #define _LL_AUX_H_
@@ -142,33 +142,5 @@ int sendFrame(unsigned char* frame, int fd, int length);
  * @return Return value of the read() call if successful; negative if an error occurs
  */
 int readByte(unsigned char* byte, int fd);
-
-/**
- * Opens the connection for the receiver
- * @param fd File descriptor for the serial port
- * @return File descriptor; -1 in case of error
- */
-int llOpenReceiver(int fd);
-
-/**
- * Opens the connection for the transmitter
- * @param fd File descriptor for the serial port
- * @return File descriptor; -1 in case of error
- */
-int llOpenTransmitter(int fd);
-
-/**
- * Closes the connection for the transmitter
- * @param fd File descriptor for the serial port
- * @return Positive value when sucess; negative value when error
- */
-int llCloseTransmitter(int fd);
-
-/**
- * Closes the connection for the receiver
- * @param fd File descriptor for the serial port
- * @return Positive value when sucess; negative value when error
- */
-int llCloseReceiver(int fd);
 
 #endif // _LL_AUX_H_

@@ -1,6 +1,10 @@
 #ifndef _MACROS_H_
 #define _MACROS_H_
 
+// MISC
+#define FALSE 0
+#define TRUE 1
+
 // ---- macros for data link layer ----
 #define MAX_SIZE_DATA   1024 // max size of a data packet
 #define MAX_SIZE_PACK   (MAX_SIZE_DATA + 4) // max size of a data packet + 4 bytes for packet head
@@ -14,9 +18,6 @@
 #define BAUDRATE 9600 // 38400 is the normal value
 #define _POSIX_SOURCE 1 // POSIX compliant source
 
-#define FALSE 0
-#define TRUE 1
-
 #define N_TRIES 3 // Number of tries before the alarm stops
 #define TIMEOUT 4 // Timeout for the alarm
 
@@ -24,8 +25,8 @@
 #define INFORMATION 1 // Information frame
 
 #define FLAG     0x7E // Synchronisation: start or end of frame
-#define END_SEND 0x03 // Address field in frames that are commands sent by the Transmitter or replies sent by theReceiver
-#define END_REC  0x01 // Address field in frames that are commands sent by the Receiver or replies sent by the Transmitter
+#define ADD_SEND 0x03 // Address field in frames that are commands sent by the Sender or replies sent by the Receiver
+#define ADD_REC  0x01 // Address field in frames that are commands sent by the Receiver or replies sent by the Sender
 #define I_0      0x00 // Information frame number 0
 #define I_1      0x40 // Information frame number 1
 #define SET      0x03 // Set Up --> sent by the transmitter to initiate a connection

@@ -1,5 +1,4 @@
 // Link layer header.
-// NOTE: This file must not be changed.
 
 #ifndef _LINK_LAYER_H_
 #define _LINK_LAYER_H_
@@ -16,14 +15,14 @@ typedef enum
 
 typedef struct
 {
-    char serialPort[50]; /* Dispositivo /dev/ttySx, x = 0, 1 */
-    LinkLayerRole role; /*  Papel desempenhado na transmissão: Transmitter ou Receiver */
-    int baudRate; /* Velocidade de transmissão */
-    unsigned int nRetransmissions;/* Número de tentativas em caso de erro */
-    unsigned int timeout; /* Valor do temporizador em segundos */
-    unsigned char frame[MAX_SIZE_FRAME]; /* Trama */
-    unsigned int frame_length; /* Tamanho atual da trama */
-    unsigned int sequenceNumber; /* Número de sequência da trama: 0, 1 */
+    char serialPort[50]; /* Device /dev/ttySx, x = 0, 1 */
+    LinkLayerRole role; /*  Role played in tranmission: Transmitter ou Receiver */
+    int baudRate; /* Rate at which information is transferred in the channel*/
+    unsigned int nRetransmissions;/* Number of retries in case of error */
+    unsigned int timeout; /* Value of the timer in seconds */
+    unsigned char frame[MAX_SIZE_FRAME]; /* Frame */
+    unsigned int frame_length; /* Current frame size */
+    unsigned int sequenceNumber; /* Frame sequence number: 0, 1 */
 
 } LinkLayer;
 
@@ -35,26 +34,65 @@ struct termios oldtio;
 // Maximum number of bytes that application layer should send to link layer
 #define MAX_PAYLOAD_SIZE 1000
 
-// MISC
-#define FALSE 0
-#define TRUE 1
 
-// Open a connection using the "port" parameters defined in struct linkLayer.
-// Return "1" on success or "-1" on error.
+
+/**
+ * Open a connection using the "port" parameters defined in struct linkLayer.
+ * @param connectionParameters LinkLayer struct with information for the connection to be opened
+ * @return Positive value when sucess; negative value when error
+ */
 int llopen(LinkLayer connectionParameters);
 
-// Send data in buffer with size length.
-// Return number of chars written, or "-1" on error.
+/**
+ * Opens the connection for the receiver
+ * @param fd File descriptor for the serial port
+ * @return File descriptor; -1 in case of error
+ */
+int llOpenReceiver(int fd);
+
+/**
+ * Opens the connection for the transmitter
+ * @param fd File descriptor for the serial port
+ * @return File descriptor; -1 in case of error
+ */
+int llOpenTransmitter(int fd);
+
+/**
+ * Receive data in packet.
+ * @param fd File descriptor for the serial port
+ * @param buffer Buffer to be wrriten
+ * @param length Size of the buffer
+ * @return Number of chars written; negative value when error
+ */
 int llwrite(int fd, unsigned char *buffer, int length);
 
-// Receive data in packet.
-// Return number of chars read, or "-1" on error.
+/**
+ * Receive data in packet.
+ * @param fd File descriptor for the serial port
+ * @param packet Packet to be read
+ * @return Number of chars read; negative value when error
+ */
 int llread(int fd, unsigned char *packet);
 
-// Close previously opened connection.
-// con includes fd and oldtio struct.
-// fd is the File descriptor that was opened with the given port.
-// Return "1" on success or "-1" on error.
+/**
+ * Close previously opened connection.
+ * @param fd File descriptor for the serial port
+ * @return Positive value when sucess; negative value when error
+ */
 int llclose(int fd);
+
+/**
+ * Closes the connection for the receiver
+ * @param fd File descriptor for the serial port
+ * @return Positive value when sucess; negative value when error
+ */
+int llCloseReceiver(int fd);
+
+/**
+ * Closes the connection for the transmitter
+ * @param fd File descriptor for the serial port
+ * @return Positive value when sucess; negative value when error
+ */
+int llCloseTransmitter(int fd);
 
 #endif // _LINK_LAYER_H_

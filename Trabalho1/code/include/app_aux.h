@@ -1,4 +1,4 @@
-// Auxiliary file header.
+// Application layer auxiliary file header.
 
 #ifndef _APP_AUX_H_
 #define _APP_AUX_H_

@@ -1,3 +1,5 @@
+// Application layer protocol auxiliary funtions
+
 #include "app_aux.h"
 
 int buildDataPacket(unsigned char *packetBuffer, int sequenceNumber, unsigned char *dataBuffer, int dataLength) {
