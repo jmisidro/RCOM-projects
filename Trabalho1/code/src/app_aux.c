@@ -32,7 +32,7 @@ int parseDataPacket(unsigned char *packetBuffer, unsigned char *data, int *seque
     *sequenceNumber = (int)packetBuffer[1];
 
     // number of octets (K = 256 * L2 + L1) in the data field
-    int dataLength = 256 * (int)packetBuffer[3] + (int)packetBuffer[2];
+    int dataLength = 256 * (int)packetBuffer[2] + (int)packetBuffer[3];
 
     for (int i = 0; i < dataLength; i++)
     {

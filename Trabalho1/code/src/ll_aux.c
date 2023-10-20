@@ -287,11 +287,13 @@ int readInformationFrame(unsigned char* frame, int fd, unsigned char* expectedBy
 
 
 int sendFrame(unsigned char* frame, int fd, int length) {
-    if( (write(fd, frame, length)) <= 0) {
-      return -1;
+    int n;
+
+    if( (n = write(fd, frame, length)) <= 0){
+        return -1;
     }
 
-    return 1;
+    return n;
 }
 
 int readByte(unsigned char* byte, int fd) {

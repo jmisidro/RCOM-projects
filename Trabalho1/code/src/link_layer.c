@@ -162,6 +162,7 @@ int llwrite(int fd, unsigned char *packet, int length)
             return -1;
         }
 
+
         printf("llwrite: Sent I frame\n");
 
         int read_value = -1;
@@ -209,7 +210,7 @@ int llwrite(int fd, unsigned char *packet, int length)
         else // read a REJ
             dataSent = FALSE;
 
-        printf("llwrite: Received response frame, N = %d\n", responseBuffer[2]);
+        printf("llwrite: Received response frame, C = %x\n", responseBuffer[2]);
     }
 
     if (ll.sequenceNumber == 0)
@@ -242,12 +243,13 @@ int llread(int fd, unsigned char *packet)
 
     read_value = readInformationFrame(ll.frame, fd, expectedBytes, 2, ADD_SEND);
 
-    printf("llread: Received I frame\n");
+    printf("llread: Received Info frame\n");
 
     if ((numBytesRead = byteDestuffing(ll.frame, read_value)) < 0) {
       closeNonCanonical(oldtio, fd);
       return -1;
     }
+
 
     int controlByteRead;
     if (ll.frame[2] == I_0)
@@ -319,7 +321,7 @@ int llread(int fd, unsigned char *packet)
       return -1;
     }
 
-    printf("llread: Sent response frame, N = %d\n", controlByteRead);
+    printf("llread: Sent response frame, C = %x\n", ll.frame[2]);
 
   }
 
