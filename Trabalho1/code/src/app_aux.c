@@ -113,3 +113,15 @@ int parseControlPacket(unsigned char *packetBuffer, int *fileSize, char *fileNam
 
     return 0;
 }
+
+int getFileSize(FILE *fp) {
+
+    int lsize;
+    
+    fseek(fp, 0, SEEK_END);
+    lsize = (int)ftell(fp);
+    rewind(fp);
+
+    return lsize;
+}
+

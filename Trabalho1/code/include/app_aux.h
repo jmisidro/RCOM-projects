@@ -54,5 +54,12 @@ int buildControlPacket(unsigned char *packetBuffer, unsigned char controlByte, i
  */
 int parseControlPacket(unsigned char *packetBuffer, int *fileSize, char *fileName);
 
+/**
+ * Auxiliary function to obtain the size of a file, from its file pointer
+ * @param fp File pointer to the file
+ * @return size of the file in question
+ */
+int getFileSize(FILE *fp);
+
 
 #endif // _LL_AUX_H_

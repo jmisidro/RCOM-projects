@@ -15,7 +15,7 @@
 
 #define BUF_SIZE_SUP    5 // size of a supervision frame
 
-#define BAUDRATE 9600 // 38400 is the normal value
+#define BAUDRATE 38400 // 38400 is the normal value
 #define _POSIX_SOURCE 1 // POSIX compliant source
 
 #define N_TRIES 3 // Number of tries before the alarm stops

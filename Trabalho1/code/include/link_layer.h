@@ -60,11 +60,11 @@ int llOpenTransmitter(int fd);
 /**
  * Receive data in packet.
  * @param fd File descriptor for the serial port
- * @param buffer Buffer to be wrriten
- * @param length Size of the buffer
+ * @param packet Packet to be wrriten
+ * @param length Size of the packet
  * @return Number of chars written; negative value when error
  */
-int llwrite(int fd, unsigned char *buffer, int length);
+int llwrite(int fd, unsigned char *packet, int length);
 
 /**
  * Receive data in packet.

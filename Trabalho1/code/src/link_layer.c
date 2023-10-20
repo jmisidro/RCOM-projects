@@ -116,7 +116,7 @@ int llOpenTransmitter(int fd)
   }
 
   if (read_value == -1) {
-    printf("llopen: Closing file descriptor\n");
+    printf("llopen ERROR: Closing file descriptor\n");
     return -1;
   }
 
@@ -128,7 +128,7 @@ int llOpenTransmitter(int fd)
 ////////////////////////////////////////////////
 // LLWRITE
 ////////////////////////////////////////////////
-int llwrite(int fd, unsigned char *buffer, int length)
+int llwrite(int fd, unsigned char *packet, int length)
 {
     unsigned char responseBuffer[BUF_SIZE_SUP]; // buffer to receive the response
     unsigned char controlByte; // controlByte --> information frame number 
@@ -138,7 +138,7 @@ int llwrite(int fd, unsigned char *buffer, int length)
     else
         controlByte = I_1;
 
-    if (createInformationFrame(ll.frame, controlByte, buffer, length) != 0) {
+    if (createInformationFrame(ll.frame, controlByte, packet, length) != 0) {
         closeNonCanonical(oldtio, fd);
         return -1;
     }
@@ -199,7 +199,7 @@ int llwrite(int fd, unsigned char *buffer, int length)
         }
 
         if (read_value == -1) {
-            printf("llwrite: Closing file descriptor\n");
+            printf("llwrite ERROR: Closing file descriptor\n");
             closeNonCanonical(oldtio, fd);
             return -1;
         }
@@ -408,7 +408,7 @@ int llCloseReceiver(int fd)
   }
 
   if (read_value == -1) {
-    printf("llclose: Closing file descriptor\n");
+    printf("llclose ERROR: Closing file descriptor\n");
     return -1;
   }
 
@@ -462,7 +462,7 @@ int llCloseTransmitter(int fd)
   }
 
   if (read_value == -1) {
-    printf("llclose: Closing file descriptor\n");
+    printf("llclose ERROR: Closing file descriptor\n");
     return -1;
   }
 
