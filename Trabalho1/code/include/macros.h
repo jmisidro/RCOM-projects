@@ -5,7 +5,8 @@
 #define FALSE 0
 #define TRUE 1
 
-// ---- macros for data link layer ----
+// ---- macros for both layers ----
+
 #define MAX_SIZE_DATA   1024 // max size of a data packet
 #define MAX_SIZE_PACK   (MAX_SIZE_DATA + 4) // max size of a data packet + 4 bytes for packet head
 #define MAX_SIZE        (MAX_SIZE_PACK + 6) // max size of data in a frame + 4 bytes fot packet head, + 6 bytes for frame header and tail
@@ -20,6 +21,8 @@
 
 #define N_TRIES 3 // Number of tries before the alarm stops
 #define TIMEOUT 4 // Timeout for the alarm
+
+// ---- macros for data link layer ----
 
 #define SUPERVISION 0 // Supervision frame
 #define INFORMATION 1 // Information frame
@@ -39,8 +42,8 @@
 #define VTIME_VALUE    0
 #define VMIN_VALUE     0
 
-#define BYTE_STUFFING_ESCAPE 0x5D
-#define BYTE_STUFFING_FLAG 0x5E
+#define BYTE_STUFFING_ESCAPE 0x5D // If the octet 0x7D (ESCAPE_BYTE) occurs inside the frame, the octet is replaced by the sequence: 0x7D 0x5D (ESCAPE_BYTE BYTE_STUFFING_ESCAPE)
+#define BYTE_STUFFING_FLAG 0x5E // If the octet 0x7E (FLAG) occurs inside the frame, the octet is replaced by the sequence: 0x7D 0x5E (ESCAPE_BYTE BYTE_STUFFING_FLAG)
 #define ESCAPE_BYTE 0x7D // escape octet
 
 #define DATA_START    4
@@ -48,12 +51,12 @@
 
 // ---- macros for application layer ----
 
-#define CTRL_DATA       0x01
-#define CTRL_START      0x02
-#define CTRL_END        0x03
+#define CTRL_DATA       0x01 // value for DATA in control field (C) meaning its a data packet
+#define CTRL_START      0x02 // value for START in control field (C) meaning its the START control packet
+#define CTRL_END        0x03 // value for END in control field (C) meaning its the END control packet
 
-#define TYPE_FILESIZE   0x00
-#define TYPE_FILENAME   0x01
+#define TYPE_FILESIZE   0x00 // value for FILESIZE in the type field (T), in the control packet
+#define TYPE_FILENAME   0x01 // value for FILENAME the type field (T), in the control packet
 
 
 #endif // _MACROS_H_
