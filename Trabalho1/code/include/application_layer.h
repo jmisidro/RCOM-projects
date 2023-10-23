@@ -35,7 +35,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
 
 /**
  * Function to receive a file, that was sent using the serial port
- * @param connectionParameters LinkLayer struct with information for the connection to be opened
+ * @param filename Name of the file to be saved, received through the serial port
  * @return 0 when sucess; negative value when error
  */
 int receiveFile(const char *filename);
