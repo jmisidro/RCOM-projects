@@ -12,7 +12,7 @@
 #include "macros.h"
 
 
-int isExpected(unsigned char byte, state_machine* sm) {
+int is_expected(unsigned char byte, state_machine* sm) {
   for (int i = 0; i < sm->expectedBytesLength; i++) {
     if (sm->expectedBytes[i] == byte)
       return i;
@@ -68,7 +68,7 @@ void event_handler(state_machine* sm, unsigned char byte, unsigned char* frame, 
               change_state(sm, FLAG_RCV);
           else {
               int n;
-              if ((n = isExpected(byte, sm))>=0){
+              if ((n = is_expected(byte, sm))>=0){
                 change_state(sm, C_RCV);
                 sm->foundIndex = n;
                 frame[2] = byte;
@@ -136,7 +136,7 @@ void event_handler(state_machine* sm, unsigned char byte, unsigned char* frame, 
                 i = (int) sm->state;
             }
             else {
-              if (isExpected(byte, sm) >= 0){
+              if (is_expected(byte, sm) >= 0){
                 change_state(sm, C_RCV);
                 frame[i++] = byte;
               }

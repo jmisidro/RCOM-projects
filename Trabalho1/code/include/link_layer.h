@@ -16,7 +16,7 @@ typedef enum
 typedef struct
 {
     char serialPort[50]; /* Device /dev/ttySx, x = 0, 1 */
-    LinkLayerRole role; /*  Role played in tranmission: Transmitter ou Receiver */
+    LinkLayerRole role; /*  Role played in transfer: Transmitter ou Receiver */
     int baudRate; /* Rate at which information is transferred in the channel*/
     unsigned int nRetransmissions;/* Number of retries in case of error */
     unsigned int timeout; /* Value of the timer in seconds */
@@ -38,10 +38,9 @@ struct termios oldtio;
 
 /**
  * Open a connection using the "port" parameters defined in struct linkLayer.
- * @param connectionParameters LinkLayer struct with information for the connection to be opened
  * @return Positive value when sucess; negative value when error
  */
-int llopen(LinkLayer connectionParameters);
+int llopen();
 
 /**
  * Opens the connection for the receiver
@@ -58,9 +57,9 @@ int llOpenReceiver(int fd);
 int llOpenTransmitter(int fd);
 
 /**
- * Receive data in packet.
+ * Transfer data stored in packet.
  * @param fd File descriptor for the serial port
- * @param packet Packet to be wrriten
+ * @param packet Packet (data) to be wrriten
  * @param length Size of the packet
  * @return Number of chars written; negative value when error
  */
@@ -69,7 +68,7 @@ int llwrite(int fd, unsigned char *packet, int length);
 /**
  * Receive data in packet.
  * @param fd File descriptor for the serial port
- * @param packet Packet to be read
+ * @param packet Packet to store the data read in
  * @return Number of chars read; negative value when error
  */
 int llread(int fd, unsigned char *packet);

@@ -5,7 +5,7 @@
 void applicationLayer(const char *serialPort, const char *role, int baudRate,
                       int nTries, int timeout, const char *filename)
 {    
-    // store linklayer info in ll struct to be used in the link layer protocols
+    // store linklayer info in ll struct to be used in the link layer protocol
     strcpy(ll.serialPort, serialPort);
     if (strcmp("tx", role) == 0)
         ll.role = LlTx;
@@ -51,7 +51,7 @@ int receiveFile(const char *filename)
     }
 
     // store file descriptor in ApplicationLayer struct
-    al.fileDescriptor = llopen(ll);
+    al.fileDescriptor = llopen();
     if (al.fileDescriptor == -1) {
         printf("\nxxxxxx llopen failed xxxxxx\n\n");
         return -1;
@@ -186,7 +186,7 @@ int sendFile(const char *filename)
     }
 
     // store file descriptor in ApplicationLayer struct
-    al.fileDescriptor = llopen(ll);
+    al.fileDescriptor = llopen();
     if (al.fileDescriptor == -1) {
         printf("\nxxxxxx llopen failed xxxxxx\n\n");
         return -1;

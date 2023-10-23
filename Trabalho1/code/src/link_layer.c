@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////
 // LLOPEN
 ////////////////////////////////////////////////
-int llopen(LinkLayer connectionParameters)
+int llopen()
 {
     int fd, returnFd;
 
@@ -17,7 +17,7 @@ int llopen(LinkLayer connectionParameters)
     // installs alarm handler
     alarmHandlerInstaller();
 
-    if (connectionParameters.role == LlTx) // Transmitter
+    if (ll.role == LlTx) // Transmitter
     {
         returnFd = llOpenTransmitter(fd);
         if (returnFd < 0) {
@@ -27,7 +27,7 @@ int llopen(LinkLayer connectionParameters)
         else
             return returnFd;
     }
-    else if (connectionParameters.role == LlRx) // Receiver
+    else if (ll.role == LlRx) // Receiver
     {
         returnFd = llOpenReceiver(fd);
         if (returnFd < 0) {
@@ -262,7 +262,7 @@ int llread(int fd, unsigned char *packet)
     if (ll.frame[numBytesRead - 2] == createBCC_2(&ll.frame[DATA_START], numBytesRead - 6)) { // checks if bcc2 is correct
 
         if (controlByteRead == ll.sequenceNumber) { // Expected frame (sequence number matches the number in control byte)  
-            // transfers information to the buffer
+            // transfers information to the packet
             for (int i = 0; i < numBytesRead - 6; i++)
                 packet[i] = ll.frame[DATA_START + i];
 
