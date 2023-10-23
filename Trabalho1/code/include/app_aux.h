@@ -43,7 +43,7 @@ int parseDataPacket(unsigned char *packetBuffer, unsigned char *data, int *seque
  * @param fileName Name of the file
  * @return Length of the packet buffer
  */
-int buildControlPacket(unsigned char *packetBuffer, unsigned char controlByte, int fileSize, char *fileName);
+int buildControlPacket(unsigned char *packetBuffer, unsigned char controlByte, int fileSize, const char *fileName);
 
 /**
  * Function, to be called by the reader, that parses the control packets

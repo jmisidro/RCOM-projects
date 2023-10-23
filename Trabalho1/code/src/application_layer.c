@@ -37,6 +37,10 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
 
 int receiveFile(const char *filename)
 {
+    struct timeval start, end;
+
+    srand(time(0));
+
     // creates and opens file to write on
     FILE* fp;
     fp = fopen(filename, "w");
@@ -59,10 +63,18 @@ int receiveFile(const char *filename)
     int packetSize;
     unsigned char packetBuffer[MAX_SIZE_PACK], data[MAX_SIZE_DATA];
 
+
+    // register start time
+    gettimeofday(&start , NULL);
+
+    usleep(60000);
     packetSize = llread(al.fileDescriptor, packetBuffer);
     if (packetSize < 0)
         return -1;
 
+    int numBitsReceived = 0;
+
+    numBitsReceived += packetSize * 8;
 
     int packet_filesize_start, packet_filesize_end; // used to compare the filesize stored in the packet
     char packet_filename_start[255], packet_filename_end[255]; // used to compare the filename stored in the packet
@@ -82,9 +94,13 @@ int receiveFile(const char *filename)
     // read throught received data packets (file data) until receiving the END packet
     while (TRUE)
     {
+        usleep(60000);
         packetSize = llread(al.fileDescriptor, packetBuffer);
         if (packetSize < 0)
             return -1;
+
+        numBitsReceived += packetSize * 8;
+
 
         if (packetBuffer[0] == CTRL_DATA) {  // received data packet
 
@@ -111,6 +127,24 @@ int receiveFile(const char *filename)
     }
 
     printf("\n------ Finished receiving file! ------\n\n");
+
+    gettimeofday(&end, NULL);
+    // get the difference in seconds, multiply by a million
+    double transferTime = (end.tv_sec - start.tv_sec) * 1e6;
+    // then add the difference in microseconds, finally divide by a million to convert result to seconds
+    transferTime = (transferTime +(end.tv_usec - start.tv_usec)) * 1e-6;
+
+    printf("\n------ Protocol Effiency ------\n\n");
+
+    printf("Number of bits received =  %d\n", numBitsReceived);
+    printf("File transfer time (seconds) =  %lf\n", transferTime);
+    double R =  numBitsReceived/transferTime;
+    double baudRate = 38400.0;
+    double S = R / baudRate;
+
+    printf("\n\nReceived bitrate R = %lf", R);
+    printf("\n\nLink capacity (Baudrate) C = %lf", baudRate);
+    printf("\n\nEffiency statistic S (S = R / C) = %lf\n\n", S);
 
 
     if (getFileSize(fp) != packet_filesize_start) {

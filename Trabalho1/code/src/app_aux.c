@@ -42,7 +42,7 @@ int parseDataPacket(unsigned char *packetBuffer, unsigned char *data, int *seque
     return 0;
 }
 
-int buildControlPacket(unsigned char *packetBuffer, unsigned char controlByte, int fileSize, char *fileName) {
+int buildControlPacket(unsigned char *packetBuffer, unsigned char controlByte, int fileSize, const char *fileName) {
 
     packetBuffer[0] = controlByte;
 
