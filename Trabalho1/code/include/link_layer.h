@@ -37,7 +37,7 @@ struct termios oldtio;
 
 
 /**
- * Open a connection using the "port" parameters defined in struct linkLayer.
+ * Open a connection using the "port" parameters defined in struct LinkLayer (global variable).
  * @return Positive value when sucess; negative value when error
  */
 int llopen();

@@ -41,15 +41,6 @@ int receiveFile(const char *filename)
 
     srand(time(0));
 
-    // creates and opens file to write on
-    FILE* fp;
-    fp = fopen(filename, "w");
-    
-    if (fp == NULL) {
-        perror(filename);
-        return -1;
-    }
-
     // store file descriptor in ApplicationLayer struct
     al.fileDescriptor = llopen();
     if (al.fileDescriptor == -1) {
@@ -86,6 +77,16 @@ int receiveFile(const char *filename)
     }
     else
         return -1;
+
+
+    // creates and opens file to write on
+    FILE* fp;
+    fp = fopen(filename, "w");
+    
+    if (fp == NULL) {
+        perror(filename);
+        return -1;
+    }
 
     int sequenceNumber, expectedSequenceNumber = 0, dataLength;
 
