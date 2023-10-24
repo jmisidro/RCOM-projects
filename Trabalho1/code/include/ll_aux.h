@@ -106,7 +106,7 @@ int createInformationFrame(unsigned char* frame, unsigned char controlField, uns
 
 /**
  * Function to read a supervision frame, sent according to the serial port file transfer protocol
- * @param frame Address where the frame will be stored
+ * @param frame Address where the frame is being stored
  * @param fd File descriptor from which to read the frame
  * @param expectedBytes Array containing the possible expected control bytes of the frame
  * @param expectedBytesLength Number of possible expected control bytes of the frame
@@ -117,7 +117,7 @@ int readSupervisionFrame(unsigned char* frame, int fd, unsigned char* expectedBy
 
 /**
  * Function to read an information frame, sent according to the serial port file transfer protocol
- * @param frame Address where the frame will be stored
+ * @param frame Address where the frame is being stored
  * @param fd File descriptor from which to read the frame
  * @param expectedBytes Array containing the possible expected control bytes of the frame
  * @param expectedBytesLength Number of possible expected control bytes of the frame
@@ -135,12 +135,5 @@ int readInformationFrame(unsigned char* frame, int fd, unsigned char* expectedBy
  */
 int sendFrame(unsigned char* frame, int fd, int length);
 
-/**
- * Function to read a byte from the designated file descriptor
- * @param byte Address to which to store the byte
- * @param fd File descriptor from which to read the byte
- * @return Return value of the read() call if successful; negative if an error occurs
- */
-int readByte(unsigned char* byte, int fd);
 
 #endif // _LL_AUX_H_

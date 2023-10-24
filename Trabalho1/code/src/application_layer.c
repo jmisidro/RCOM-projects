@@ -19,7 +19,7 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
     ll.nRetransmissions = nTries;
     ll.timeout = timeout;
 
-    /* File Transfer */
+    // File Transfer
     if (ll.role == LlTx) {
         if (sendFile(filename) < 0) {
             printf("\nxxxxxx sendFile failed xxxxxx\n\n");

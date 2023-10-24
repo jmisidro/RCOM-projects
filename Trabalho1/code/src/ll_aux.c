@@ -2,10 +2,7 @@
 
 #include "ll_aux.h"
 
-/**
- * Handles the alarm signal
- * @param signal Signal that is received
- */
+
 void alarmHandler(int signal) {
 
   if (num_retr < ll.nRetransmissions) {
@@ -250,14 +247,16 @@ int readSupervisionFrame(unsigned char* frame, int fd, unsigned char* expectedBy
 
     unsigned char byte;
 
+    // run state machine
     while(st->state != STOP && !finish && !resendFrame) {
-      if(readByte(&byte, fd) == 0)
+      if(read(fd, &byte, sizeof(unsigned char)) > 0)
         event_handler(st, byte, frame, SUPERVISION);
     }
 
+    // return index found in state machine
     int ret = st->foundIndex;
 
-    destroy_st(st);
+    destroy_state_machine(st);
 
     if(finish || resendFrame)
         return -1;
@@ -271,23 +270,24 @@ int readInformationFrame(unsigned char* frame, int fd, unsigned char* expectedBy
 
     state_machine *st = create_state_machine(expectedBytes, expectedBytesLength, addressByte);
     unsigned char byte;
-
+      
+    // run state machine
     while(st->state != STOP) {
-      if(readByte(&byte, fd) == 0)
+      if(read(fd, &byte, sizeof(unsigned char)) > 0)
         event_handler(st, byte, frame, INFORMATION);
     }
 
-    // dataLength = length of the data packet sent from the application on the transmitter side (includes data packet + bcc2, with stuffing)
+    // return dataLength = length of the data packet sent from the application on the transmitter side (includes data packet + bcc2, with stuffing)
     int ret = st->dataLength;
 
-    destroy_st(st);
+    destroy_state_machine(st);
 
     return ret;
 }
 
 
 int sendFrame(unsigned char* frame, int fd, int length) {
-    int n;
+    int n; // number of bytes written
 
     if( (n = write(fd, frame, length)) <= 0){
         return -1;
@@ -296,11 +296,5 @@ int sendFrame(unsigned char* frame, int fd, int length) {
     return n;
 }
 
-int readByte(unsigned char* byte, int fd) {
 
-    if(read(fd, byte, sizeof(unsigned char)) <= 0)
-      return -1;
-
-    return 0;
-}
 

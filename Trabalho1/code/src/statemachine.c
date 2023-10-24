@@ -22,14 +22,9 @@ int is_expected(unsigned char byte, state_machine* sm) {
 }
 
 
-void change_state(state_machine* sm, state st) {
-    sm->state = st;
-}
-
-
 state_machine* create_state_machine(unsigned char* expectedBytes, int expectedBytesLength, unsigned char addressByte) {
     state_machine* sm = malloc(sizeof(state_machine));
-    change_state(sm, START);
+    sm->state = START;
     sm->expectedBytes = expectedBytes;
     sm->expectedBytesLength = expectedBytesLength;
     sm->addressByte = addressByte;
@@ -47,7 +42,7 @@ void event_handler(state_machine* sm, unsigned char byte, unsigned char* frame, 
 
       case START:
           if (byte == FLAG) {
-              change_state(sm, FLAG_RCV);
+              sm->state = FLAG_RCV;
               frame[0] = byte;
           }
           break;
@@ -56,47 +51,47 @@ void event_handler(state_machine* sm, unsigned char byte, unsigned char* frame, 
           if (byte == FLAG)
               break;
           else if (byte == sm->addressByte) {
-              change_state(sm, A_RCV);
+              sm->state = A_RCV;
               frame[1] = byte;
           }
           else
-              change_state(sm, START);
+              sm->state = START;
           break;
 
       case A_RCV:
           if (byte == FLAG)
-              change_state(sm, FLAG_RCV);
+              sm->state = FLAG_RCV;
           else {
               int n;
               if ((n = is_expected(byte, sm))>=0){
-                change_state(sm, C_RCV);
+                sm->state = C_RCV;
                 sm->foundIndex = n;
                 frame[2] = byte;
               }
               else
-                change_state(sm, START);
+                sm->state = START;
           }
           break;
 
       case C_RCV:
           if (byte == createBCC(frame[1], frame[2])){
-              change_state(sm, BCC_OK);
+              sm->state = BCC_OK;
               frame[3] = byte;
           }
 
           else if (byte == FLAG)
-              change_state(sm, FLAG_RCV);
+              sm->state = FLAG_RCV;
           else
-              change_state(sm, START);
+              sm->state = START;
           break;
 
       case BCC_OK:
           if (byte == FLAG){
-              change_state(sm, STOP);
+              sm->state = STOP;
               frame[4] = byte;
           }
           else
-              change_state(sm, START);
+              sm->state = START;
           break;
 
       default:
@@ -112,7 +107,7 @@ void event_handler(state_machine* sm, unsigned char byte, unsigned char* frame, 
         case START:
             i = 0;
             if (byte == FLAG) {
-                change_state(sm, FLAG_RCV);
+                sm->state = FLAG_RCV;
                 frame[i++] = byte;
             }
             break;
@@ -121,27 +116,27 @@ void event_handler(state_machine* sm, unsigned char byte, unsigned char* frame, 
             if (byte == FLAG)
                 break;
             else if (byte == sm->addressByte) {
-                change_state(sm, A_RCV);
+                sm->state = A_RCV;
                 frame[i++] = byte;
             }
             else {
-                change_state(sm, START);
+                sm->state = START;
                 i = (int) sm->state;
             }
             break;
 
         case A_RCV:
             if (byte == FLAG) {
-                change_state(sm, FLAG_RCV);
+                sm->state = FLAG_RCV;
                 i = (int) sm->state;
             }
             else {
               if (is_expected(byte, sm) >= 0){
-                change_state(sm, C_RCV);
+                sm->state = C_RCV;
                 frame[i++] = byte;
               }
               else {
-                change_state(sm, START);
+                sm->state = START;
                 i = (int) sm->state;
               }
             }
@@ -149,14 +144,14 @@ void event_handler(state_machine* sm, unsigned char byte, unsigned char* frame, 
 
         case C_RCV:
             if (byte == createBCC(frame[1], frame[2])){
-                change_state(sm, BCC_OK);
+                sm->state = BCC_OK;
                 frame[i++] = byte;
             }
             else {
               if (byte == FLAG)
-                change_state(sm, FLAG_RCV);
+                sm->state = FLAG_RCV;
               else
-                change_state(sm, START);
+                sm->state = START;
 
               i = (int) sm->state;
             }
@@ -165,7 +160,7 @@ void event_handler(state_machine* sm, unsigned char byte, unsigned char* frame, 
         case BCC_OK:
             if(byte ==  FLAG){
               frame[i] = byte;
-              change_state(sm, STOP);
+              sm->state = STOP;
               sm->dataLength = i-4;
             }
             else{
@@ -183,6 +178,6 @@ void event_handler(state_machine* sm, unsigned char byte, unsigned char* frame, 
 
 }
 
-void destroy_st(state_machine* sm) {
+void destroy_state_machine(state_machine* sm) {
   free(sm);
 }
