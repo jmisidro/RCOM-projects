@@ -93,7 +93,7 @@ int closeNonCanonical(struct termios oldtio, int fd) {
 
     close(fd);
 
-    return 1;
+    return 0;
 }
 
 unsigned char createBCC(unsigned char a, unsigned char c) {

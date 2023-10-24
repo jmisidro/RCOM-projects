@@ -15,18 +15,17 @@
 
 
 /**
- * Function that builds an application data packet, receiving a sequence number, and a data buffer
- * containing the bytes to be sent; returns the information on the packet buffer.
+ * Function that builds an application data packet
  * @param packetBuffer Buffer that will have the final contents of the packet
  * @param sequenceNumber Sequence number of the packet
- * @param dataBuffer Buffer with the data
+ * @param dataBuffer Buffer with the data to fill the packet
  * @param dataLength Length of the data in the buffer
  * @return Length of the packet buffer
  */
 int buildDataPacket(unsigned char *packetBuffer, int sequenceNumber, unsigned char *dataBuffer, int dataLength);
 
 /**
- * Function, to be called by the reader, that parses the data packets
+ * Function that parses the data packets
  * @param packetBuffer Buffer with the data packet
  * @param data Pointer to the file data packet extracted, to be returned by the function
  * @param sequenceNumber Pointer to the sequence number of the packet, to be returned by the function
@@ -39,14 +38,14 @@ int parseDataPacket(unsigned char *packetBuffer, unsigned char *data, int *seque
  * Function that builds a control packet
  * @param packetBuffer Buffer that will have the final contents of the packet
  * @param controlByte Can be CTRL_START or CTRL_END, to show if the control packet indicates the beginning or end of the file
- * @param fileSize Size of the full file, in bytes
+ * @param fileSize Size of the file, in bytes
  * @param fileName Name of the file
  * @return Length of the packet buffer
  */
 int buildControlPacket(unsigned char *packetBuffer, unsigned char controlByte, int fileSize, const char *fileName);
 
 /**
- * Function, to be called by the reader, that parses the control packets
+ * Function that parses the control packets
  * @param packetBuffer Buffer with the control packet
  * @param fileSize Pointer to the size of the file, to be returned by the function
  * @param fileName Pointer to the name of the file, to be returned by the function
@@ -57,7 +56,7 @@ int parseControlPacket(unsigned char *packetBuffer, int *fileSize, char *fileNam
 /**
  * Auxiliary function to obtain the size of a file, from its file pointer
  * @param fp File pointer to the file
- * @return size of the file in question
+ * @return Size of the file in question
  */
 int getFileSize(FILE *fp);
 

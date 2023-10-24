@@ -17,7 +17,7 @@ typedef struct {
     unsigned char* expectedBytes; /* Array of possible bytes that are expected in the frame */
     int expectedBytesLength; /* Number of possible bytes that are expected in the frame */
     unsigned char addressByte; /* Address from which the frame is expected */
-    int foundIndex; /* Index of the array where the byte was found; negative if byte is not a member */
+    int foundIndex; /* Index of the array where the byte was found; negative value otherwise */
     int dataLength; /* Length of the data packet sent from the application on the transmitter side (includes data packet + bcc2, with stuffing) */
 } state_machine;
 
@@ -26,7 +26,7 @@ typedef struct {
  * Function to check if a byte is contained in the state machine's expectedBytes field, indicating it is expected
  * @param byte Byte to be checked
  * @param sm State machine for which to check
- * @return Index of the array where the byte was found; negative if byte is not a member
+ * @return Index of the array where the byte was found; negative value otherwise
  */
 int is_expected(unsigned char byte, state_machine* sm);
 

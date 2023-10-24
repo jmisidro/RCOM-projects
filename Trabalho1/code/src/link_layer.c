@@ -20,7 +20,7 @@ int llopen()
     if (ll.role == LlTx) // Transmitter
     {
         returnFd = llOpenTransmitter(fd);
-        if (returnFd < 0) {
+        if (returnFd == -1) {
             closeNonCanonical(oldtio, fd);
             return -1;
         }
@@ -30,7 +30,7 @@ int llopen()
     else if (ll.role == LlRx) // Receiver
     {
         returnFd = llOpenReceiver(fd);
-        if (returnFd < 0) {
+        if (returnFd == -1) {
             closeNonCanonical(oldtio, fd);
             return -1;
         }
@@ -334,13 +334,13 @@ int llread(int fd, unsigned char *packet)
 int llclose(int fd)
 {
     if (ll.role == LlTx) {
-        if (llCloseTransmitter(fd) < 0) {
+        if (llCloseTransmitter(fd) == -1) {
             closeNonCanonical(oldtio, fd);
             return -1;
         }
     }
     else if (ll.role == LlRx) {
-        if (llCloseReceiver(fd) < 0) { 
+        if (llCloseReceiver(fd) == -1) { 
             closeNonCanonical(oldtio, fd);
             return -1;
         }

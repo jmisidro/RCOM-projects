@@ -38,7 +38,7 @@ void alarmHandlerInstaller();
  * in the non-canonical mode, according to the serial port file transfer protocol
  * @param vtime Value to be assigned to the VTIME field of the new settings - time between bytes read
  * @param vmin Value to be assigned to the VMIN field of the new settings - minimum amount of bytes to read
- * @return File descriptor that was opened with the given port
+ * @return File descriptor that was opened with the given port; negative value otherwise
  */
 int openNonCanonical(int vtime, int vmin);
 
@@ -47,7 +47,7 @@ int openNonCanonical(int vtime, int vmin);
  * in the non-canonical mode, according to the serial port file transfer protocol
  * @param fd File descriptor that was opened with the given port
  * @param oldtio termios used to store oldtio to restore the old port settings when closing the connection
- * @return Return -1 in an error occurs
+ * @return 0 if it was sucessful; negative value otherwise
  */
 int closeNonCanonical(struct termios oldtio, int fd);
 

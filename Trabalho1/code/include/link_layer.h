@@ -38,21 +38,21 @@ struct termios oldtio;
 
 /**
  * Open a connection using the "port" parameters defined in struct LinkLayer (global variable).
- * @return Positive value when sucess; negative value when error
+ * @return File descriptor; negative value otherwise
  */
 int llopen();
 
 /**
  * Opens the connection for the receiver
  * @param fd File descriptor for the serial port
- * @return File descriptor; -1 in case of error
+ * @return File descriptor; negative value otherwise
  */
 int llOpenReceiver(int fd);
 
 /**
  * Opens the connection for the transmitter
  * @param fd File descriptor for the serial port
- * @return File descriptor; -1 in case of error
+ * @return File descriptor; negative value otherwise
  */
 int llOpenTransmitter(int fd);
 
@@ -61,7 +61,7 @@ int llOpenTransmitter(int fd);
  * @param fd File descriptor for the serial port
  * @param packet Packet (data) to be wrriten
  * @param length Size of the packet
- * @return Number of chars written; negative value when error
+ * @return Number of chars written; negative value otherwise
  */
 int llwrite(int fd, unsigned char *packet, int length);
 
@@ -69,28 +69,28 @@ int llwrite(int fd, unsigned char *packet, int length);
  * Receive data in packet.
  * @param fd File descriptor for the serial port
  * @param packet Packet to store the data read in
- * @return Number of chars read; negative value when error
+ * @return Number of chars read; negative value otherwise
  */
 int llread(int fd, unsigned char *packet);
 
 /**
  * Close previously opened connection.
  * @param fd File descriptor for the serial port
- * @return Positive value when sucess; negative value when error
+ * @return Positive value if it was sucessful; negative value otherwise
  */
 int llclose(int fd);
 
 /**
  * Closes the connection for the receiver
  * @param fd File descriptor for the serial port
- * @return Positive value when sucess; negative value when error
+ * @return Positive value if it was sucessful; negative value otherwise
  */
 int llCloseReceiver(int fd);
 
 /**
  * Closes the connection for the transmitter
  * @param fd File descriptor for the serial port
- * @return Positive value when sucess; negative value when error
+ * @return Positive value if it was sucessful; negative value otherwise
  */
 int llCloseTransmitter(int fd);
 

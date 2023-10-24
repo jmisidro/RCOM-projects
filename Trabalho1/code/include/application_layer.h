@@ -36,14 +36,14 @@ void applicationLayer(const char *serialPort, const char *role, int baudRate,
 /**
  * Function to receive a file, that was sent using the serial port
  * @param filename Name of the file to be saved, received through the serial port
- * @return 0 when sucess; negative value when error
+ * @return 0 if it was sucessful; negative value otherwise
  */
 int receiveFile(const char *filename);
 
 /**
- * Function to send a file, using the serial port
+ * Function to send a file,using the serial port
  * @param filename Name of the file to be sent through the serial port
- * @return 0 when sucess; negative value when error
+ * @return 0 if it was sucessful; negative value otherwise
  */
 int sendFile(const char *filename);
 
