@@ -229,6 +229,8 @@ int llwrite(int fd, unsigned char *packet, int length)
 ////////////////////////////////////////////////
 int llread(int fd, unsigned char *packet)
 {
+  // use current time as seed for random generator 
+  srand(time(0)); 
 
   int numBytesRead; // number of bytes read
   unsigned char expectedBytes[2];
@@ -259,7 +261,10 @@ int llread(int fd, unsigned char *packet)
 
     unsigned char responseByte;
 
-    if (ll.frame[numBytesRead - 2] == createBCC_2(&ll.frame[DATA_START], numBytesRead - 6)) { // checks if bcc2 is correct
+    // generate random number between 1 and 100
+    int randomNum = (rand() % (100 - 1 + 1)) + 1; 
+                                                                                // if (randomNum <= X): P(FER) = X
+    if (ll.frame[numBytesRead - 2] == createBCC_2(&ll.frame[DATA_START], numBytesRead - 6) && randomNum <= 3) { // checks if bcc2 is correct
 
         if (controlByteRead == ll.sequenceNumber) { // Expected frame (sequence number matches the number in control byte)  
             // transfers information to the packet

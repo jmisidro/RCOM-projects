@@ -4,6 +4,8 @@
 #define _LINK_LAYER_H_
 
 #include <termios.h>
+#include <sys/times.h>
+#include <sys/time.h>
 #include "macros.h"
 #include "ll_aux.h"
 
