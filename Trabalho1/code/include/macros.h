@@ -46,7 +46,7 @@
 #define BYTE_STUFFING_FLAG 0x5E // If the octet 0x7E (FLAG) occurs inside the frame, the octet is replaced by the sequence: 0x7D 0x5E (ESCAPE_BYTE BYTE_STUFFING_FLAG)
 #define ESCAPE_BYTE 0x7D // escape octet
 
-#define DATA_START    4
+#define DATA_START    4 // start of the data field in an I-frame
 
 
 // ---- macros for application layer ----

@@ -39,7 +39,8 @@ int receiveFile(const char *filename)
 {
     struct timeval start, end;
 
-    srand(time(0));
+    // use current time as seed for random generator 
+    //srand(time(0));
 
     // store file descriptor in ApplicationLayer struct
     al.fileDescriptor = llopen();
@@ -58,7 +59,7 @@ int receiveFile(const char *filename)
     // register start time
     gettimeofday(&start , NULL);
 
-    usleep(60000);
+    //usleep(50000);
     packetSize = llread(al.fileDescriptor, packetBuffer);
     if (packetSize < 0)
         return -1;
@@ -95,7 +96,7 @@ int receiveFile(const char *filename)
     // read throught received data packets (file data) until receiving the END packet
     while (TRUE)
     {
-        usleep(60000);
+        //usleep(50000);
         packetSize = llread(al.fileDescriptor, packetBuffer);
         if (packetSize < 0)
             return -1;
