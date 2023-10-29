@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include "macros.h"
-#include "statemachine.h"
+#include "state_machine.h"
 #include "link_layer.h"
 
 // global variables

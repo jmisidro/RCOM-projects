@@ -59,7 +59,6 @@ int receiveFile(const char *filename)
     // register start time
     gettimeofday(&start , NULL);
 
-    //usleep(50000);
     packetSize = llread(al.fileDescriptor, packetBuffer);
     if (packetSize < 0)
         return -1;
@@ -96,7 +95,6 @@ int receiveFile(const char *filename)
     // read throught received data packets (file data) until receiving the END packet
     while (TRUE)
     {
-        //usleep(50000);
         packetSize = llread(al.fileDescriptor, packetBuffer);
         if (packetSize < 0)
             return -1;
