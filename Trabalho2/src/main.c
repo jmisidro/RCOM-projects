@@ -3,8 +3,8 @@
 #include "app.h"
 
 int main(int argc, char *argv[]) {
-    if(argc != 2) {
-        printf("Usage: %s %s", argv[0], "ftp://[<user>:<password>@]<host>/<url-path>");
+    if(argc != 2) { 
+        printf("Usage: %s %s", argv[0], "ftp://{user}:{password}@{host}/{url-path}");
         return -1;
     }
     // parse command line arguments
