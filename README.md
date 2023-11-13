@@ -1,7 +1,7 @@
 # RCOM
 `Projects developed as part of a RC (Computer Networks) course @FEUP`
 
-## [First Project](Trabalho1/README.txt)
+## [First Project](Trabalho1/README.md)
 
 `A data link layer protocol, with a simple file transfer application to test it`
 
