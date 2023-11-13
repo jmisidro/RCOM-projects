@@ -1,4 +1,4 @@
-#include "aux.h"
+#include "app.h"
 
 int getIPAddress(char *ipAddress, char *hostName) {
     struct hostent *h;

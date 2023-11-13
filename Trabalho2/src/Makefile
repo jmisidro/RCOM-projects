@@ -1,5 +1,5 @@
-HEADERS = aux.h macros.h
-OBJECTS = main.o aux.o
+HEADERS = app.h macros.h
+OBJECTS = main.o app.o
 
 # Parameters
 CC = gcc

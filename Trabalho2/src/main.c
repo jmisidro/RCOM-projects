@@ -1,6 +1,6 @@
 #include <stdio.h> 
 #include "macros.h"
-#include "aux.h"
+#include "app.h"
 
 int main(int argc, char *argv[]) {
     if(argc != 2) {
