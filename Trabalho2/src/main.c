@@ -25,8 +25,7 @@ int main(int argc, char *argv[]) {
 
 
     struct FTP ftp;
-    char command[MAX_LENGTH];           // buffer to send commands
-    char response[MAX_LENGTH];    // buffer to read the response from commands
+    char reply[MAX_LENGTH];    // buffer to read the reply from commands
 
     // get IP Address
     char ipAddress[MAX_LENGTH];
@@ -46,7 +45,30 @@ int main(int argc, char *argv[]) {
     }
     printf("\n----- Connected to new control Socket ------\n\n");
 
-    if (sendToControlSocket(&ftp, "user", params.user) < 0) {
+    // receive confirmation from server
+    readReplyFromControlSocket(&ftp, reply, MAX_LENGTH);
+    if (reply[0] != '2') { // Error
+         printf("Error in conection...\n\n");
+        return -1;
+    }
+
+    if (sendCommandToControlSocket(&ftp, "user", params.user) < 0) {
+        return -1;
+    }
+
+    readReplyFromControlSocket(&ftp, reply, MAX_LENGTH);
+    if (reply[0] != '3') { // Error
+         printf("Error in conection...\n\n");
+        return -1;
+    }
+
+    if (sendCommandToControlSocket(&ftp, "pass", params.password) < 0) {
+        return -1;
+    }
+
+    readReplyFromControlSocket(&ftp, reply, MAX_LENGTH);
+    if (reply[0] != '2') { // Error
+         printf("Error in conection...\n\n");
         return -1;
     }
 

@@ -5,10 +5,10 @@ OBJECTS = main.o app.o
 CC = gcc
 CFLAGS = -Wall -c
 
-USER = anonymous
-PWD = anonymous@
-HOST = ftp://netlab1.fe.up.pt
-PATH =
+USER = rcom
+PASS = rcom
+HOST = netlab1.fe.up.pt
+URL_PATH = files/pic1.jpg
 
 default: download
 
@@ -17,6 +17,9 @@ default: download
 
 download: $(OBJECTS)
 	$(CC) $(OBJECTS) -o $@
+
+run_download:
+	./download ftp://$(USER):$(PASS)@$(HOST)/$(URL_PATH)
 
 clean:
 	-rm -f $(OBJECTS)

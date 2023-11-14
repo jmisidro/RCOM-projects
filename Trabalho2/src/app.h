@@ -22,7 +22,7 @@ struct FTPparameters{
 };
 
 /**
- * Struct that contains the control and data file descriptors for the FTP protocol
+ * Struct that contains the control and data file descriptors for the FTP
  */
 struct FTP{
     int control_socket_fd; /* File descriptor to control socket */
@@ -59,11 +59,20 @@ int parseArguments(struct FTPparameters *params, char *commandLineArg);
 /**
  * Function that sends a command through the control socket
  * 
- * @param ftp The struct containing the control and data file descriptors for the FTP protocol
+ * @param ftp Struct containing the socket descriptors
  * @param command The command to be sent
  * @param argument The argument of the command
  * @return 0 if success; -1 otherwise
  */
-int sendToControlSocket(struct FTP *ftp, char *command, char *argument);
+int sendCommandToControlSocket(struct FTP *ftp, char *command, char *argument);
+
+/**
+ * Function that reads a reply from a control socket, according to FTP
+ * 
+ * @param ftp Struct containing the socket descriptors
+ * @param buffer Buffer containing the reply code and message received from the server
+ * @return 0 if success; -1 otherwise
+ */
+int readReplyFromControlSocket(struct FTP *ftp, char *buffer, size_t size);
 
 #endif // _AUX_H_

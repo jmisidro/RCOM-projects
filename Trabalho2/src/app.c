@@ -91,7 +91,7 @@ int parseArguments(struct FTPparameters* params, char* commandLineArg) {
 }
 
 
-int sendToControlSocket(struct FTP *ftp, char *command, char *argument) {
+int sendCommandToControlSocket(struct FTP *ftp, char *command, char *argument) {
 
     printf("Sending command to control Socket: %s %s\n", command, argument);
 
@@ -112,5 +112,21 @@ int sendToControlSocket(struct FTP *ftp, char *command, char *argument) {
     if (bytes != 1)
         return -1;
 
+    return 0;
+}
+
+
+int readReplyFromControlSocket(struct FTP *ftp, char *buffer, size_t size) {
+
+    printf("Reading reply from control Socket... \n");
+
+    FILE *fp = fdopen(ftp->control_socket_fd, "r");
+    do {
+        /* reset the memory of the buffer in each iteration */
+        memset(buffer, 0, size);                    // reads until:
+        buffer = fgets(buffer, size, fp);          // - reaches end of reply  
+        printf("> %s", buffer);                   // - reply code is not correct (fail safe)
+    } while (buffer[3] != ' ' || !('1' <= buffer[0] && buffer[0] <= '5'));
+    
     return 0;
 }
