@@ -34,7 +34,7 @@ struct FTP{
  * 
  * @param idAddress Variable that is going to point to the IP Address
  * @param hostName The host's name
- * @return int 0 if success; -1 otherwise
+ * @return 0 if success; -1 otherwise
  */
 int getIPAddress(char *ipAddress, char *hostName);
 
@@ -45,7 +45,7 @@ int getIPAddress(char *ipAddress, char *hostName);
  * @param port The number of the port to be used
  * @return Socket descriptor if success; -1 otherwise
  */
-int openAndConnectSocket(char* address, int port);
+int openAndConnectSocket(char *address, int port);
 
 /**
  * Function that parses the command line arguments, retrieving a struct with all the individual fields
@@ -54,6 +54,16 @@ int openAndConnectSocket(char* address, int port);
  * @param commandLineArg Argument from the command line, that is going to be parsed
  * @return 0 if sucess; -1 otherwise
  */
-int parseArguments(struct FTPparameters* params, char* commandLineArg);
+int parseArguments(struct FTPparameters *params, char *commandLineArg);
+
+/**
+ * Function that sends a command through the control socket
+ * 
+ * @param ftp The struct containing the control and data file descriptors for the FTP protocol
+ * @param command The command to be sent
+ * @param argument The argument of the command
+ * @return 0 if success; -1 otherwise
+ */
+int sendToControlSocket(struct FTP *ftp, char *command, char *argument);
 
 #endif // _AUX_H_

@@ -15,19 +15,23 @@ int openAndConnectSocket(char* address, int port) {
     int sockfd;
     struct sockaddr_in server_addr;
 
-    /*server address handling*/
+    printf("Opening new socket...\n");
+
+    /* server address handling */
     bzero((char *) &server_addr, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = inet_addr(address);    /*32 bit Internet address network byte ordered*/
     server_addr.sin_port = htons(port);        /*server TCP port must be network byte ordered */
 
-    /*open a TCP socket*/
+    /* open a TCP socket*/
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         perror("socket()");
         exit(-1);
     }
 
-    /*connect to the server*/
+    printf("Connecting to new socket...\n");
+
+    /* connect to the server */
     if (connect(sockfd,
                 (struct sockaddr *) &server_addr,
                 sizeof(server_addr)) < 0) {
@@ -81,7 +85,32 @@ int parseArguments(struct FTPparameters* params, char* commandLineArg) {
     }
     strcpy(params->file_path, token);
     
-    printf("Parsed command line arguments.\n\n");
+    printf("Parsed command line arguments.\n");
+
+    return 0;
+}
+
+
+int sendToControlSocket(struct FTP *ftp, char *command, char *argument) {
+
+    printf("Sending command to control Socket: %s %s\n", command, argument);
+
+    /* sends command's code */
+    int bytes = write(ftp->control_socket_fd, command, strlen(command));
+    if (bytes != strlen(command))
+        return -1;
+    /* sends a space to separate the command's code and argument */
+    bytes = write(ftp->control_socket_fd, " ", 1);
+    if (bytes != 1)
+        return -1;
+    /* sends command's argument */
+    bytes = write(ftp->control_socket_fd, argument, strlen(argument));
+    if (bytes != strlen(argument))
+        return -1;
+    /* sends end of line code to signal the end of the command */
+    bytes = write(ftp->control_socket_fd, "\n", 1);
+    if (bytes != 1)
+        return -1;
 
     return 0;
 }

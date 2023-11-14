@@ -8,7 +8,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
        
-    printf("\n----- Verifying FTP parameters -----\n\n");
+    printf("\n--------- Verifying FTP parameters ---------\n\n");
 
     // parse command line arguments
     struct FTPparameters params;
@@ -21,7 +21,8 @@ int main(int argc, char *argv[]) {
     printf("Host name: %s\n", params.host_name);
     printf("File path: %s\n", params.file_path);
 
-    printf("\n----- FTP parameters verified ------\n\n");
+    printf("\n--------- FTP parameters verified ----------\n\n");
+
 
     struct FTP ftp;
     char command[MAX_LENGTH];           // buffer to send commands
@@ -33,16 +34,21 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    printf("\n------ Creating new Socket... ------\n\n");
+    printf("\n----- Connecting to new control Socket -----\n\n");
+
     printf("IP Address: %s\n", ipAddress);
     printf("Port: %d\n", FTP_PORT_NUMBER);
 
     // create and connect socket to server
     if ((ftp.control_socket_fd = openAndConnectSocket(ipAddress, FTP_PORT_NUMBER)) < 0) {
-        printf("Error creating new socket\n");
+        printf("Error opening new socket\n");
         return -1;
     }
-    printf("\n-------- New Socket Created --------\n\n");
+    printf("\n----- Connected to new control Socket ------\n\n");
+
+    if (sendToControlSocket(&ftp, "user", params.user) < 0) {
+        return -1;
+    }
 
     return 0;
 }
