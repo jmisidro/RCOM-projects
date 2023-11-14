@@ -15,10 +15,18 @@
  * Struct that contains the necessary fields to parse the command line arguments passed
  */
 struct FTPparameters{
-    char user[MAX_LENGTH]; /**< user string */
-    char password[MAX_LENGTH]; /**< password string */
-    char host_name[MAX_LENGTH]; /**< host name string */
-    char file_path[MAX_LENGTH]; /**< file path string */    
+    char user[MAX_LENGTH]; /* user string */
+    char password[MAX_LENGTH]; /* password string */
+    char host_name[MAX_LENGTH]; /* host name string */
+    char file_path[MAX_LENGTH]; /* file path string */    
+};
+
+/**
+ * Struct that contains the control and data file descriptors for the FTP protocol
+ */
+struct FTP{
+    int control_socket_fd; /* File descriptor to control socket */
+    int data_socket_fd; /* File descriptor to data socket */   
 };
 
 /**
