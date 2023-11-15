@@ -19,6 +19,7 @@ struct FTPparameters{
     char password[MAX_LENGTH]; /* password string */
     char host_name[MAX_LENGTH]; /* host name string */
     char file_path[MAX_LENGTH]; /* file path string */    
+    char file_name[MAX_LENGTH]; /* file name string */    
 };
 
 /**

@@ -46,46 +46,73 @@ int openAndConnectSocket(char* address, int port) {
 int parseArguments(struct FTPparameters* params, char* commandLineArg) {
 
     printf("Parsing command line arguments...\n");
-    //verifying FTP protocol
-    char* token = strtok(commandLineArg, ":");
-    if((token == NULL) || (strcmp(token, "ftp") != 0)) {
-        printf(" > Error in the protocol name (should be 'ftp')\n");
+
+    // verifying FTP protocol
+    char *token = strtok(commandLineArg, ":");
+    if ((token == NULL) || (strcmp(token, "ftp") != 0)) {
+        printf("-> Error in the protocol name (should be 'ftp')\n");
         return -1;
     }
 
-    // parsing user name
-    token = strtok(NULL, ":");
-    if(token == NULL || (strlen(token) < 3) || (token[0] != '/') || (token[1] != '/')) {
-        printf(" > Error parsing the user name\n");
+    token = strtok(NULL, "\0");
+    char string[MAX_LENGTH];
+    strcpy(string, token);
+
+    char aux[MAX_LENGTH];
+    strcpy(aux, string);
+    token = strtok(aux, ":");
+
+    if (token == NULL || (strlen(token) < 3) || (token[0] != '/') || (token[1] != '/')) {
+        printf("-> Error parsing the user name\n");
         return -1;
     }
-    strcpy(params->user, &token[2]);
+    else if (strcmp(token, string) == 0) { 
+        // if user and password are not set, set them to anonymous
+        strcpy(params->user, "anonymous");
+        strcpy(params->password, "");
 
-    // parsing password
-    token = strtok(NULL, "@");
-    if(token == NULL || (strlen(token) == 0)) {
-        printf(" > Error parsing the password\n");
-        return -1;
+        char aux2[MAX_LENGTH];
+        strcpy(aux2, &string[2]);
+        strcpy(string, aux2);
     }
-    strcpy(params->password, token);
+    else {
+        // parsing user name
+        strcpy(params->user, &token[2]);
+        // parsing password
+        token = strtok(NULL, "@");
+        if (token == NULL || (strlen(token) == 0)) {
+            printf("-> Error parsing the password\n");
+            return -1;
+        }
+        strcpy(params->password, token);
 
-    // parsing hostname
-    token = strtok(NULL, "/");
-    if(token == NULL || (strlen(token) == 0)) {
-        printf(" > Error parsing the host name\n");
+        token = strtok(NULL, "\0");
+        strcpy(string, token);
+    }
+
+    // parsing host name
+    token = strtok(string, "/");    
+    if (token == NULL) {
+        printf("-> Error parsing the hostname\n");
         return -1;
     }
     strcpy(params->host_name, token);
 
-    // parsing file path
+    // parsing file path and file name
     token = strtok(NULL, "\0");
-    if(token == NULL || (strlen(token) == 0)) {
-        printf(" > Error parsing the host name\n");
+    if (token == NULL) {
+        printf("-> Error parsing the file path\n");
         return -1;
     }
-    strcpy(params->file_path, token);
-    
-    printf("Parsed command line arguments.\n");
+    char* last = strrchr(token, '/');
+    if (last != NULL) {
+        strncpy(params->file_path, token, last - token);
+        strcpy(params->file_name, last + 1);
+    }
+    else {
+        strcpy(params->file_path, "");
+        strcpy(params->file_name, token);
+    }
 
     return 0;
 }

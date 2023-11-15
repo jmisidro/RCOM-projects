@@ -20,6 +20,8 @@ int main(int argc, char *argv[]) {
     printf("Password: %s\n", params.password);
     printf("Host name: %s\n", params.host_name);
     printf("File path: %s\n", params.file_path);
+    printf("File name: %s\n", params.file_name);
+
 
     printf("\n--------- FTP parameters verified ----------\n\n");
 
