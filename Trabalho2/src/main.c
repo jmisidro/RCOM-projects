@@ -42,37 +42,28 @@ int main(int argc, char *argv[]) {
 
     // create and connect socket to server
     if ((ftp.control_socket_fd = openAndConnectSocket(ipAddress, FTP_PORT_NUMBER)) < 0) {
-        printf("Error opening new socket\n");
+        printf("> Error opening new socket\n");
         return -1;
     }
     printf("\n----- Connected to new control Socket ------\n\n");
 
     // receive confirmation from server
-    readReplyFromControlSocket(&ftp, reply, MAX_LENGTH);
+    readReplyFromControlSocket(&ftp, reply);
     if (reply[0] != '2') { // Error
-         printf("Error in conection...\n\n");
+        printf("> Error in conection...\n\n");
         return -1;
     }
 
-    if (sendCommandToControlSocket(&ftp, "user", params.user) < 0) {
+    printf("\n------- Logging in to the FTP server -------\n\n");
+
+    // login in the server
+    if (login(&ftp, params.user, params.password)<0) {
+        printf("> Login failed...\n\n");
         return -1;
     }
 
-    readReplyFromControlSocket(&ftp, reply, MAX_LENGTH);
-    if (reply[0] != '3') { // Error
-         printf("Error in conection...\n\n");
-        return -1;
-    }
+    printf("\n---------- Logged in successfully ----------\n\n");
 
-    if (sendCommandToControlSocket(&ftp, "pass", params.password) < 0) {
-        return -1;
-    }
-
-    readReplyFromControlSocket(&ftp, reply, MAX_LENGTH);
-    if (reply[0] != '2') { // Error
-         printf("Error in conection...\n\n");
-        return -1;
-    }
 
     return 0;
 }

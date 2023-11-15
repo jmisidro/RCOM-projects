@@ -47,10 +47,10 @@ int parseArguments(struct FTPparameters* params, char* commandLineArg) {
 
     printf("Parsing command line arguments...\n");
 
-    // verifying FTP protocol
+    /* verifying FTP protocol */
     char *token = strtok(commandLineArg, ":");
     if ((token == NULL) || (strcmp(token, "ftp") != 0)) {
-        printf("-> Error in the protocol name (should be 'ftp')\n");
+        printf("> Error in the protocol name (should be 'ftp')\n");
         return -1;
     }
 
@@ -62,8 +62,9 @@ int parseArguments(struct FTPparameters* params, char* commandLineArg) {
     strcpy(aux, string);
     token = strtok(aux, ":");
 
+    /* verifying user and password */
     if (token == NULL || (strlen(token) < 3) || (token[0] != '/') || (token[1] != '/')) {
-        printf("-> Error parsing the user name\n");
+        printf("> Error while parsing the user name\n");
         return -1;
     }
     else if (strcmp(token, string) == 0) { 
@@ -76,12 +77,12 @@ int parseArguments(struct FTPparameters* params, char* commandLineArg) {
         strcpy(string, aux2);
     }
     else {
-        // parsing user name
+        /* parsing user name */
         strcpy(params->user, &token[2]);
-        // parsing password
+        /* parsing password */
         token = strtok(NULL, "@");
         if (token == NULL || (strlen(token) == 0)) {
-            printf("-> Error parsing the password\n");
+            printf("> Error while parsing the password\n");
             return -1;
         }
         strcpy(params->password, token);
@@ -90,26 +91,26 @@ int parseArguments(struct FTPparameters* params, char* commandLineArg) {
         strcpy(string, token);
     }
 
-    // parsing host name
+    /* parsing host name */
     token = strtok(string, "/");    
     if (token == NULL) {
-        printf("-> Error parsing the hostname\n");
+        printf("> Error parsing the hostname\n");
         return -1;
     }
     strcpy(params->host_name, token);
 
-    // parsing file path and file name
+    /* parsing file path and file name */ 
     token = strtok(NULL, "\0");
     if (token == NULL) {
-        printf("-> Error parsing the file path\n");
+        printf("> Error while parsing the file path\n");
         return -1;
     }
     char* last = strrchr(token, '/');
-    if (last != NULL) {
+    if (last != NULL) { // path is set
         strncpy(params->file_path, token, last - token);
         strcpy(params->file_name, last + 1);
     }
-    else {
+    else {  // path is not set
         strcpy(params->file_path, "");
         strcpy(params->file_name, token);
     }
@@ -143,17 +144,81 @@ int sendCommandToControlSocket(struct FTP *ftp, char *command, char *argument) {
 }
 
 
-int readReplyFromControlSocket(struct FTP *ftp, char *buffer, size_t size) {
+int readReplyFromControlSocket(struct FTP *ftp, char *buffer) {
 
     printf("Reading reply from control Socket... \n");
 
     FILE *fp = fdopen(ftp->control_socket_fd, "r");
     do {
         /* reset the memory of the buffer in each iteration */
-        memset(buffer, 0, size);                    // reads until:
-        buffer = fgets(buffer, size, fp);          // - reaches end of reply  
+        memset(buffer, 0, MAX_LENGTH);                    // reads until:
+        buffer = fgets(buffer, MAX_LENGTH, fp);          // - reaches end of reply  
         printf("> %s", buffer);                   // - reply code is not correct (fail safe)
     } while (buffer[3] != ' ' || !('1' <= buffer[0] && buffer[0] <= '5'));
     
+    return 0;
+}
+
+
+int sendCommandHandleReply(struct FTP *ftp, char *command, char *argument, char *reply, int dowloadingFile) {
+    if (sendCommandToControlSocket(ftp, command, argument) < 0) {
+        printf("> Error while sending command  %s %s\n", command, argument);
+        return -1;
+    }
+    int code;
+    while (1) {
+        readReplyFromControlSocket(ftp, reply);
+        code = reply[0] - '0'; // first digit of reply code
+        switch (code) {
+            case 1:
+                // expecting another reply
+                if (dowloadingFile) return 1; // if downloading a file, reply will be 150
+                else break;                   // else expect another reply
+            case 2:
+                // requested action successful
+                return 2;
+            case 3:
+                // needs aditional information
+                return 3;
+            case 4:
+                // try resending the command
+                if (sendCommandToControlSocket(ftp, command, argument) < 0) {
+                    printf("> Error while sending command  %s %s\n", command, argument);
+                    return -1;
+                }
+                break;
+            case 5:
+                // Command was not accepted, close control socket & exit application
+                printf("> Command was not accepted \n");
+                close(ftp->control_socket_fd);
+                exit(-1);
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+
+int login(struct FTP *ftp, char *user, char *password) {
+
+    char reply[MAX_LENGTH];
+    
+    printf("Sending User...\n\n");
+    /* ret is the return value corresponding to the first digit of the reply code */
+    int ret = sendCommandHandleReply(ftp, "user", user, reply, FALSE);
+    if (ret != 3) {
+        printf("> Error while sending User...\n\n");
+        return -1;
+    }
+
+    printf("\nSending Password...\n\n");
+    /* ret is the return value corresponding to the first digit of the reply code */
+    ret = sendCommandHandleReply(ftp, "pass", password, reply, FALSE);
+    if (ret != 2) {
+        printf("> Error while sending Password...\n\n");
+        return -1;
+    }
+
     return 0;
 }

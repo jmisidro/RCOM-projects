@@ -61,8 +61,8 @@ int parseArguments(struct FTPparameters *params, char *commandLineArg);
  * Function that sends a command through the control socket
  * 
  * @param ftp Struct containing the socket descriptors
- * @param command The command to be sent
- * @param argument The argument of the command
+ * @param command Command to be sent
+ * @param argument Argument of the command to be sent
  * @return 0 if success; -1 otherwise
  */
 int sendCommandToControlSocket(struct FTP *ftp, char *command, char *argument);
@@ -74,6 +74,29 @@ int sendCommandToControlSocket(struct FTP *ftp, char *command, char *argument);
  * @param buffer Buffer containing the reply code and message received from the server
  * @return 0 if success; -1 otherwise
  */
-int readReplyFromControlSocket(struct FTP *ftp, char *buffer, size_t size);
+int readReplyFromControlSocket(struct FTP *ftp, char *buffer);
+
+/**
+ * Function that sends a command to the control socket and handles the reply received
+ * 
+ * @param ftp Struct containing the socket descriptors
+ * @param command Command to be sent
+ * @param argument Argument of the command to be sent
+ * @param reply Buffer that is going to store the reply code and message received from the server
+ * @param dowloadingFile Indicates if the file is about to be transfered from the data socket
+ * @return Positive if success (the first digit of the reply code); -1 otherwise
+ */
+int sendCommandHandleReply(struct FTP *ftp, char *command, char *argument, char *reply, int dowloadingFile);
+
+
+/**
+ * Function that sends the login information to the socket for authentication
+ * 
+ * @param ftp Struct containing the socket descriptors
+ * @param user User to be sent to the socket
+ * @param password Password to be sent to the socket
+ * @return 0 if success; -1 otherwise
+ */
+int login(struct FTP *ftp, char *user, char *password);
 
 #endif // _AUX_H_
