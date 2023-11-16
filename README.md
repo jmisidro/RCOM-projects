@@ -13,4 +13,16 @@
 * Develop a simple file transfer application transfer to test the protocol implemented
 
 
-## Second Project
+## [Second Project](Trabalho2/README.md)
+
+`A download application for the FTP and the configuration and study of a computer network`
+
+### Goals
+
+* Develop a download application for the FTP
+    - Understand the FTP and later use this application to analyse the computer network configured
+    
+* Configure and analyse a computer network
+    - Through a series of experiments, develop a better understanding of the concepts of computer networks, compare and use the main technologies of the above-mentioned;
+    - Implement, configure and evaluate key mechanisms and components of computer networks.
+

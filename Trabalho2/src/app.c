@@ -58,10 +58,10 @@ int parseArguments(struct FTPparameters* params, char* commandLineArg) {
     }
 
     token = strtok(NULL, "\0");
-    char string[MAX_LENGTH];
+    char* string = (char *) malloc(MAX_LENGTH);
     strcpy(string, token);
 
-    char aux[MAX_LENGTH];
+    char* aux = (char *) malloc(MAX_LENGTH);
     strcpy(aux, string);
     token = strtok(aux, ":");
 
@@ -75,9 +75,10 @@ int parseArguments(struct FTPparameters* params, char* commandLineArg) {
         strcpy(params->user, "anonymous");
         strcpy(params->password, "");
 
-        char aux2[MAX_LENGTH];
+        char* aux2 = (char *) malloc(MAX_LENGTH);
         strcpy(aux2, &string[2]);
         strcpy(string, aux2);
+        free(aux2);
     }
     else {
         /* parsing user name */
@@ -93,6 +94,8 @@ int parseArguments(struct FTPparameters* params, char* commandLineArg) {
         token = strtok(NULL, "\0");
         strcpy(string, token);
     }
+
+    free(aux);
 
     /* parsing host name */
     token = strtok(string, "/");    
@@ -117,6 +120,9 @@ int parseArguments(struct FTPparameters* params, char* commandLineArg) {
         strcpy(params->file_path, "");
         strcpy(params->file_name, token);
     }
+
+    free(string);
+
 
     return 0;
 }
@@ -177,7 +183,7 @@ int sendCommandHandleReply(struct FTP *ftp, char *command, char *argument, char 
         switch (code) {
             case 1:
                 // expecting another reply
-                if (dowloadingFile) return 1; // if downloading a file, reply will be 150
+                if (dowloadingFile) return 1; // if downloading a file, reply code should be 150
                 else break;                   // else expect another reply
             case 2:
                 // requested action successful
@@ -213,7 +219,7 @@ int login(struct FTP *ftp, char *user, char *password) {
     /* ret is the return value corresponding to the first digit of the reply code */
     int ret = sendCommandHandleReply(ftp, "user", user, reply, FALSE);
     if (ret != 3) {
-        printf("> Error while sending User...\n\n");
+        printf("> Error while sending user...\n\n");
         return -1;
     }
 
@@ -221,7 +227,7 @@ int login(struct FTP *ftp, char *user, char *password) {
     /* ret is the return value corresponding to the first digit of the reply code */
     ret = sendCommandHandleReply(ftp, "pass", password, reply, FALSE);
     if (ret != 2) {
-        printf("> Error while sending Password...\n\n");
+        printf("> Error while sending password...\n\n");
         return -1;
     }
 
@@ -250,7 +256,7 @@ int changeWorkingDirectory(struct FTP* ftp, char* path) {
 
 int enablePassiveMode(struct FTP *ftp) {
 
-    char reply[MAX_LENGTH];
+    char* reply = (char *) malloc(MAX_LENGTH);
 
     int ret = sendCommandHandleReply(ftp, "pasv", "", reply, FALSE);
     int ipPart1, ipPart2, ipPart3, ipPart4;
@@ -279,7 +285,61 @@ int enablePassiveMode(struct FTP *ftp) {
         return -1;
     }
 
+    free(reply);
     free(ipAddress);
 
     return 0;
 }
+
+
+int retrieveFile(struct FTP *ftp, char *fileName) {
+
+    char* reply = (char *) malloc(MAX_LENGTH);
+
+    /* ret is the return value corresponding to the first digit of the reply code */
+    int ret = sendCommandHandleReply(ftp, "retr", fileName, reply, TRUE);
+    if (ret != 1) { // reply code should be 150
+        printf("> Error while sending command retr\n\n");
+        return -1;
+    }
+
+    FILE* fp;
+    fp = fopen(fileName, "w");
+    if (fp == NULL) {
+        perror(fileName);
+        return -1;
+    }
+
+    char* buffer = (char *) malloc(MAX_FILE_LENGTH);
+    int bytes;
+    printf("Starting to download file %s\n", fileName);
+    while((bytes = read(ftp->data_socket_fd, buffer, sizeof(buffer)))){
+        if(bytes < 0){
+            printf("> Error whilevreading from data socket\n");
+            return -1;
+        }
+        if((bytes = fwrite(buffer, bytes, 1, fp)) < 0){
+            printf("> Error while writing data to file\n");
+            return -1;
+        }
+    }
+
+    free(buffer);
+
+    printf("Finished dowloading file!\n");
+    if(fclose(fp) < 0){
+        printf("> Error while closing file\n");
+        return -1;
+    }
+    
+    close(ftp->data_socket_fd);
+
+    readReplyFromControlSocket(ftp, reply);
+    if (reply[0] != '2')
+        return -1;
+
+    free(reply);
+
+	return 0;
+}
+

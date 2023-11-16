@@ -22,30 +22,34 @@ int main(int argc, char *argv[]) {
     printf("File name: %s\n", params.file_name);
     printf("\n--------- FTP parameters verified ----------\n\n");
 
-
-    struct FTP ftp;
-    char reply[MAX_LENGTH];    // buffer to read the reply from commands
-
     // get IP Address
-    char ipAddress[MAX_LENGTH];
+    char* ipAddress = (char *) malloc(MAX_LENGTH);
     if (getIPAddress(ipAddress, params.host_name) < 0) {
         return -1;
     }
 
-    printf("\n----- Connecting to new control Socket -----\n\n");
+    struct FTP ftp;
+
+    printf("\n--------- Connecting to FTP server ---------\n\n");
     // create and connect socket to server
-    if ((ftp.control_socket_fd = openAndConnectSocket(ipAddress, FTP_PORT_NUMBER)) < 0) {
+    if ((ftp.control_socket_fd = openAndConnectSocket(ipAddress, FTP_PORT)) < 0) {
         printf("> Error opening new socket\n");
         return -1;
     }
-    printf("\n----- Connected to new control Socket ------\n\n");
 
-    // receive confirmation from server
+    free(ipAddress);
+
+    char* reply = (char *) malloc(MAX_LENGTH);   // buffer to read the initial reply
+    // receive confirmation from server (welcome message)
     readReplyFromControlSocket(&ftp, reply);
-    if (reply[0] != '2') { // Error
+    if (reply[0] != '2') {
         printf("> Error in conection...\n\n");
         return -1;
     }
+    free(reply);
+
+    printf("\n--------- Connected to FTP server ----------\n\n");
+
 
     printf("\n------- Logging in to the FTP server -------\n\n");
     // login in the server
@@ -53,8 +57,8 @@ int main(int argc, char *argv[]) {
         printf("> Login failed...\n\n");
         return -1;
     }
-    printf("\n---------- Logged in successfully ----------\n\n");
 
+    printf("\n---------- Logged in successfully ----------\n\n");
 
 
     // change working directory in server, if needed
@@ -75,7 +79,18 @@ int main(int argc, char *argv[]) {
         printf("> Error while enabling passive mode\n");
         return -1;
     }
+
     printf("\n--------- Passive Mode was enabled ---------\n\n");
+
+
+    printf("\n---------- Starting file transfer ----------\n\n");
+    // retrieve file through data socket
+    if(retrieveFile(&ftp, params.file_name) < 0){
+        printf("> Error while retrieving file\n");
+        return -1;
+    }
+
+    printf("\n---------- File transfer is complete ----------\n\n");
 
     return 0;
 }

@@ -117,4 +117,16 @@ int changeWorkingDirectory(struct FTP* ftp, char* path);
  */
 int enablePassiveMode(struct FTP *ftp);
 
+/**
+ * Function that sends the RETR command to the control socket, 
+ * so the file can be transfered in the data socket
+ * Then proceeds to download the file sent from the server
+ * through the data socket, and saves it in a local file
+ * 
+ * @param ftp Struct containing the socket descriptors
+ * @param fileName The name of the file to be transfered
+ * @return 0 if successful; -1 otherwise
+ */
+int retrieveFile(struct FTP *ftp, char *fileName);
+
 #endif // _AUX_H_
