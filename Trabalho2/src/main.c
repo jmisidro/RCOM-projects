@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
 
     /* change working directory in server, if needed */
     if (strlen(params.file_path) > 0) {
-        printf("\n------- Chaning working directory ------\n\n");
+        printf("\n------- Changing working directory ------\n\n");
         if (changeWorkingDirectory(&ftp, params.file_path) < 0)
         {
             printf("> Error while changing working directory\n");

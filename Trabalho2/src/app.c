@@ -14,7 +14,7 @@ int getIPAddress(char *ipAddress, char *hostName) {
 
 
 int openAndConnectSocket(char* address, int port) {
-    
+
     int sockfd;
     struct sockaddr_in server_addr;
 
@@ -133,7 +133,7 @@ int parseArguments(struct FTPparameters* params, char* commandLineArg) {
 
 int sendCommandToControlSocket(struct FTP *ftp, char *command, char *argument) {
 
-    printf("Sending command to control Socket: %s %s\n", command, argument);
+    printf("Sending command to control socket: %s %s\n", command, argument);
 
     /* sends command's code */
     int bytes = write(ftp->control_socket_fd, command, strlen(command));
@@ -158,7 +158,7 @@ int sendCommandToControlSocket(struct FTP *ftp, char *command, char *argument) {
 
 int readReplyFromControlSocket(struct FTP *ftp, char *buffer) {
 
-    printf("Reading reply from control Socket... \n");
+    printf("Reading reply from control socket... \n");
 
     FILE *fp = fdopen(ftp->control_socket_fd, "r");
     do {
@@ -240,7 +240,7 @@ int login(struct FTP *ftp, char *user, char *password) {
 }
 
 
-int changeWorkingDirectory(struct FTP* ftp, char* path) {
+int changeWorkingDirectory(struct FTP *ftp, char *path) {
 
     char* reply = (char *) malloc(MAX_LENGTH);
 
@@ -281,7 +281,7 @@ int enablePassiveMode(struct FTP *ftp) {
     sprintf(ipAddress, "%d.%d.%d.%d", ipPart1, ipPart2, ipPart3, ipPart4);
     int port = portPart1 * 256 + portPart2;
 
-    printf("\nConnecting to new data socket...\n");
+    printf("\nConnecting to new data socket...\n\n");
 
     if ((ftp->data_socket_fd = openAndConnectSocket(ipAddress, port)) < 0) {
         printf("> Error while creating new data socket\n");
@@ -315,7 +315,7 @@ int retrieveFile(struct FTP *ftp, char *fileName) {
 
     char* buffer = (char *) malloc(1024);
     int bytes;
-    printf("Starting to download file %s\n", fileName);
+    printf("\nStarted dowloading file %s\n", fileName);
     while((bytes = read(ftp->data_socket_fd, buffer, sizeof(buffer)))){
         if(bytes < 0){
             printf("> Error whilevreading from data socket\n");

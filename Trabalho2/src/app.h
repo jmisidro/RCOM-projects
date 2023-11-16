@@ -106,7 +106,7 @@ int login(struct FTP *ftp, char *user, char *password);
  * @param path Path of the new working directory to be changed to
  * @return 0 if successful; -1 otherwise
  */
-int changeWorkingDirectory(struct FTP* ftp, char* path);
+int changeWorkingDirectory(struct FTP *ftp, char *path);
 
 /**
  * Function that instructs the FTP server to enter a Passive session rather than Active  
