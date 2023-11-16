@@ -15,6 +15,9 @@ int openAndConnectSocket(char* address, int port) {
     int sockfd;
     struct sockaddr_in server_addr;
 
+    printf("IP Address: %s\n", address);
+    printf("Port: %d\n", port);
+
     printf("Opening new socket...\n");
 
     /* server address handling */
@@ -161,10 +164,12 @@ int readReplyFromControlSocket(struct FTP *ftp, char *buffer) {
 
 
 int sendCommandHandleReply(struct FTP *ftp, char *command, char *argument, char *reply, int dowloadingFile) {
+
     if (sendCommandToControlSocket(ftp, command, argument) < 0) {
         printf("> Error while sending command  %s %s\n", command, argument);
         return -1;
     }
+    
     int code;
     while (1) {
         readReplyFromControlSocket(ftp, reply);
@@ -202,7 +207,7 @@ int sendCommandHandleReply(struct FTP *ftp, char *command, char *argument, char 
 
 int login(struct FTP *ftp, char *user, char *password) {
 
-    char reply[MAX_LENGTH];
+    char* reply = (char *) malloc(MAX_LENGTH);
     
     printf("Sending User...\n\n");
     /* ret is the return value corresponding to the first digit of the reply code */
@@ -219,6 +224,62 @@ int login(struct FTP *ftp, char *user, char *password) {
         printf("> Error while sending Password...\n\n");
         return -1;
     }
+
+    free(reply);
+
+    return 0;
+}
+
+
+int changeWorkingDirectory(struct FTP* ftp, char* path) {
+
+    char* reply = (char *) malloc(MAX_LENGTH);
+
+    /* ret is the return value corresponding to the first digit of the reply code */
+    int ret = sendCommandHandleReply(ftp, "cwd", path, reply, FALSE);
+    if (ret != 2) {
+        printf("> Error while sending command cwd\n\n");
+        return -1;
+    }
+
+    free(reply);
+
+	return 0;
+}
+
+
+int enablePassiveMode(struct FTP *ftp) {
+
+    char reply[MAX_LENGTH];
+
+    int ret = sendCommandHandleReply(ftp, "pasv", "", reply, FALSE);
+    int ipPart1, ipPart2, ipPart3, ipPart4;
+    int portPart1, portPart2;
+    if (ret == 2) {
+        // process ip and port informaiton
+        if ((sscanf(reply, "227 Entering Passive Mode (%d,%d,%d,%d,%d,%d)",
+                    &ipPart1, &ipPart2, &ipPart3, &ipPart4, &portPart1, &portPart2)) < 0) {
+            printf("> Error while calculating port.\n");
+            return -1;
+        }
+    }
+    else {
+        printf("> Error while sending command pasv \n\n");
+        return -1;
+    }
+    
+    char* ipAddress = (char *) malloc(MAX_LENGTH);
+    sprintf(ipAddress, "%d.%d.%d.%d", ipPart1, ipPart2, ipPart3, ipPart4);
+    int port = portPart1 * 256 + portPart2;
+
+    printf("\nConnecting to new data socket...\n");
+
+    if ((ftp->data_socket_fd = openAndConnectSocket(ipAddress, port)) < 0) {
+        printf("> Error while creating new data socket\n");
+        return -1;
+    }
+
+    free(ipAddress);
 
     return 0;
 }

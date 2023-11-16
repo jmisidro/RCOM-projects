@@ -99,4 +99,22 @@ int sendCommandHandleReply(struct FTP *ftp, char *command, char *argument, char 
  */
 int login(struct FTP *ftp, char *user, char *password);
 
+/**
+ * Function to change the working directory of the FTP server, using the CWD command
+ * 
+ * @param ftp Struct containing the socket descriptors
+ * @param path Path of the new working directory to be changed to
+ * @return 0 if successful; -1 otherwise
+ */
+int changeWorkingDirectory(struct FTP* ftp, char* path);
+
+/**
+ * Function that instructs the FTP server to enter a Passive session rather than Active  
+ * and then obtains a server IP address and Port for the data socket used in the transfer of a file
+ * 
+ * @param ftp Struct containing the socket descriptors
+ * @return 0 if success; -1 otherwise
+ */
+int enablePassiveMode(struct FTP *ftp);
+
 #endif // _AUX_H_
