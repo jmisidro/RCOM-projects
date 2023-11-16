@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "*.pl": "prolog",
+        "link_layer.h": "c",
+        "macros.h": "c",
+        "ll_aux.h": "c",
+        "_types.h": "c",
+        "_pthread_types.h": "c",
+        "state_machine.h": "c",
+        "stdlib.h": "c",
+        "socket.h": "c"
+    }
+}

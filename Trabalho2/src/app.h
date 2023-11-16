@@ -129,4 +129,13 @@ int enablePassiveMode(struct FTP *ftp);
  */
 int retrieveFile(struct FTP *ftp, char *fileName);
 
+
+/**
+ * Function to disconnect from the socket on the FTP server, using the QUIT command
+ * 
+ * @param ftp Struct containing the socket descriptors
+ * @return 0 if successful; -1 otherwise
+ */
+int disconnectFromSocket(struct FTP *ftp);
+
 #endif // _AUX_H_

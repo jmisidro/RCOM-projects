@@ -91,5 +91,13 @@ int main(int argc, char *argv[]) {
 
     printf("\n---------- File transfer is complete ----------\n\n");
 
+    printf("\n-------- Disconnecting from FTP server --------\n\n");
+    if (disconnectFromSocket(&ftp) < 0){
+        printf("> Error while disconnecting from socket\n");
+        return -1;
+    }
+
+    printf("\n-------- Disconnected from FTP server ---------\n\n");
+
     return 0;
 }

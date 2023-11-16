@@ -346,3 +346,19 @@ int retrieveFile(struct FTP *ftp, char *fileName) {
 	return 0;
 }
 
+int disconnectFromSocket(struct FTP *ftp) {
+
+    char* reply = (char *) malloc(MAX_LENGTH);
+
+    /* ret is the return value corresponding to the first digit of the reply code */
+    int ret = sendCommandHandleReply(ftp, "quit", "", reply, FALSE);
+    if (ret != 2) {
+        printf("> Error while sending command quit\n\n");
+        return -1;
+    }
+
+    free(reply);
+
+	return 0;
+}
+
