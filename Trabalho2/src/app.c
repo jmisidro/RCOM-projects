@@ -1,17 +1,20 @@
 #include "app.h"
 
 int getIPAddress(char *ipAddress, char *hostName) {
+
     struct hostent *h;
     if ((h = gethostbyname(hostName)) == NULL) {
         herror("gethostbyname");
         return -1;
     }
     strcpy(ipAddress, inet_ntoa(*((struct in_addr *)h->h_addr)));
+
     return 0;
 }
 
 
 int openAndConnectSocket(char* address, int port) {
+    
     int sockfd;
     struct sockaddr_in server_addr;
 
@@ -310,7 +313,7 @@ int retrieveFile(struct FTP *ftp, char *fileName) {
         return -1;
     }
 
-    char* buffer = (char *) malloc(MAX_FILE_LENGTH);
+    char* buffer = (char *) malloc(1024);
     int bytes;
     printf("Starting to download file %s\n", fileName);
     while((bytes = read(ftp->data_socket_fd, buffer, sizeof(buffer)))){

@@ -2,9 +2,8 @@
 #define _MACROS_H_
 
 // FTP
-#define MAX_FILE_LENGTH 1024
-#define MAX_LENGTH 200
-#define FTP_PORT 21 
+#define MAX_LENGTH 200 // max length for a given string (reply message)
+#define FTP_PORT 21 // the designated port for the FTP
 
 // MISC
 #define FALSE 0

@@ -1,5 +1,4 @@
 #include <stdio.h> 
-#include "macros.h"
 #include "app.h"
 
 int main(int argc, char *argv[]) {
@@ -9,7 +8,7 @@ int main(int argc, char *argv[]) {
     }
        
     printf("\n--------- Verifying FTP parameters ---------\n\n");
-    // parse command line arguments
+    /* parse command line arguments */
     struct FTPparameters params;
     if(parseArguments(&params, argv[1]) != 0) {
         return -1;
@@ -22,7 +21,7 @@ int main(int argc, char *argv[]) {
     printf("File name: %s\n", params.file_name);
     printf("\n--------- FTP parameters verified ----------\n\n");
 
-    // get IP Address
+    /* get IP Address */ 
     char* ipAddress = (char *) malloc(MAX_LENGTH);
     if (getIPAddress(ipAddress, params.host_name) < 0) {
         return -1;
@@ -31,7 +30,7 @@ int main(int argc, char *argv[]) {
     struct FTP ftp;
 
     printf("\n--------- Connecting to FTP server ---------\n\n");
-    // create and connect socket to server
+    /* create and connect socket to server */
     if ((ftp.control_socket_fd = openAndConnectSocket(ipAddress, FTP_PORT)) < 0) {
         printf("> Error opening new socket\n");
         return -1;
@@ -40,7 +39,7 @@ int main(int argc, char *argv[]) {
     free(ipAddress);
 
     char* reply = (char *) malloc(MAX_LENGTH);   // buffer to read the initial reply
-    // receive confirmation from server (welcome message)
+    /* receive confirmation from server (welcome message) */
     readReplyFromControlSocket(&ftp, reply);
     if (reply[0] != '2') {
         printf("> Error in conection...\n\n");
@@ -61,7 +60,7 @@ int main(int argc, char *argv[]) {
     printf("\n---------- Logged in successfully ----------\n\n");
 
 
-    // change working directory in server, if needed
+    /* change working directory in server, if needed */
     if (strlen(params.file_path) > 0) {
         printf("\n------- Chaning working directory ------\n\n");
         if (changeWorkingDirectory(&ftp, params.file_path) < 0)
@@ -73,8 +72,8 @@ int main(int argc, char *argv[]) {
     }
     
     printf("\n---------- Enabling Passive Mode -----------\n\n");
-    // send pasv command to get ip address and port
-    // and create the data socket for the file transfer
+    /* send pasv command to get ip address and port
+       and create the data socket for the file transfer */
     if (enablePassiveMode(&ftp) < 0){
         printf("> Error while enabling passive mode\n");
         return -1;
@@ -84,7 +83,7 @@ int main(int argc, char *argv[]) {
 
 
     printf("\n---------- Starting file transfer ----------\n\n");
-    // retrieve file through data socket
+    /* retrieve file through data socket */
     if(retrieveFile(&ftp, params.file_name) < 0){
         printf("> Error while retrieving file\n");
         return -1;

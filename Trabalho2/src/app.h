@@ -12,14 +12,14 @@
 #include "macros.h"
 
 /**
- * Struct that contains the necessary fields to parse the command line arguments passed
+ * Struct that contains the necessary fields to parse the command line arguments received
  */
 struct FTPparameters{
-    char user[MAX_LENGTH]; /* user string */
-    char password[MAX_LENGTH]; /* password string */
-    char host_name[MAX_LENGTH]; /* host name string */
-    char file_path[MAX_LENGTH]; /* file path string */    
-    char file_name[MAX_LENGTH]; /* file name string */    
+    char user[MAX_LENGTH]; /* User string */
+    char password[MAX_LENGTH]; /* Password string */
+    char host_name[MAX_LENGTH]; /* Host name string */
+    char file_path[MAX_LENGTH]; /* File path string */    
+    char file_name[MAX_LENGTH]; /* File name string */    
 };
 
 /**
@@ -31,7 +31,7 @@ struct FTP{
 };
 
 /**
- * Function that, having the host name, retrieves the IP address
+ * Function that, given a host name, retrieves its corresponding IP address
  * 
  * @param idAddress Variable that is going to point to the IP Address
  * @param hostName The host's name
