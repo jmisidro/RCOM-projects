@@ -318,7 +318,7 @@ int retrieveFile(struct FTP *ftp, char *fileName) {
     printf("\nStarted dowloading file %s\n", fileName);
     while((bytes = read(ftp->data_socket_fd, buffer, sizeof(buffer)))){
         if(bytes < 0){
-            printf("> Error whilevreading from data socket\n");
+            printf("> Error while reading from data socket\n");
             return -1;
         }
         if((bytes = fwrite(buffer, bytes, 1, fp)) < 0){
