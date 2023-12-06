@@ -75,7 +75,9 @@ int parseArguments(struct FTPparameters* params, char* commandLineArg) {
     }
     else if (strcmp(token, string) == 0) { 
         // if user and password are not set, set them to anonymous
+        memset(params->user, 0, sizeof(params->user));
         strcpy(params->user, "anonymous");
+        memset(params->password, 0, sizeof(params->password));
         strcpy(params->password, "");
 
         char* aux2 = (char *) malloc(MAX_LENGTH);
@@ -85,6 +87,7 @@ int parseArguments(struct FTPparameters* params, char* commandLineArg) {
     }
     else {
         /* parsing user name */
+        memset(params->user, 0, sizeof(params->user));
         strcpy(params->user, &token[2]);
         /* parsing password */
         token = strtok(NULL, "@");
@@ -92,6 +95,7 @@ int parseArguments(struct FTPparameters* params, char* commandLineArg) {
             printf("> Error while parsing the password\n");
             return -1;
         }
+        memset(params->password, 0, sizeof(params->password));
         strcpy(params->password, token);
 
         token = strtok(NULL, "\0");
@@ -106,6 +110,7 @@ int parseArguments(struct FTPparameters* params, char* commandLineArg) {
         printf("> Error parsing the hostname\n");
         return -1;
     }
+    memset(params->host_name, 0, sizeof(params->host_name));
     strcpy(params->host_name, token);
 
     /* parsing file path and file name */ 
@@ -116,16 +121,19 @@ int parseArguments(struct FTPparameters* params, char* commandLineArg) {
     }
     char* last = strrchr(token, '/');
     if (last != NULL) { // path is set
+        memset(params->file_path, 0, sizeof(params->file_path));
         strncpy(params->file_path, token, last - token);
+        memset(params->file_name, 0, sizeof(params->file_name));
         strcpy(params->file_name, last + 1);
     }
     else {  // path is not set
+        memset(params->file_path, 0, sizeof(params->file_path));
         strcpy(params->file_path, "");
+        memset(params->file_name, 0, sizeof(params->file_name));
         strcpy(params->file_name, token);
     }
 
     free(string);
-
 
     return 0;
 }
