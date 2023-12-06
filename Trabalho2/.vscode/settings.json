@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "*.pl": "prolog",
-        "unistd.h": "c",
-        "in.h": "c",
-        "socket.h": "c",
-        "netdb.h": "c"
-    }
-}
