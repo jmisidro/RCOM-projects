@@ -16,7 +16,7 @@ For a more detailed description, check the project [report](docs/report-rcom-TP2
 1. Compile the application using the provided Makefile.
 2. Run the download application (either by running the executable manually or using the Makefile target):
 	```bash
-	./download ftp://<user>:<password>@<host>/<url-path>
+	./download ftp://[<user>:<password>]@<host>/<url-path>
 	make run_download
 	```
 
