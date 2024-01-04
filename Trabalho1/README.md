@@ -50,3 +50,4 @@ For a more detailed description, check the project [report](docs/report-rcom-TP1
 	- Check if the file received matches the file sent, even with cable disconnections or with noise
 
 
+**Final Grade: 19.7**

@@ -15,6 +15,7 @@
     
 * Develop a simple file transfer application transfer to test the protocol implemented
 
+**Final Grade: 19.7**
 
 ## [Second Project](Trabalho2/README.md)
 
@@ -29,3 +30,4 @@
     - Through a series of experiments, develop a better understanding of the concepts of computer networks, compare and use the main technologies of the above-mentioned;
     - Implement, configure and evaluate key mechanisms and components of computer networks.
 
+**Final Grade: 19.8**

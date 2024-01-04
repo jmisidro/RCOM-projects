@@ -20,5 +20,4 @@ For a more detailed description, check the project [report](docs/report-rcom-TP2
 	make run_download
 	```
 
-
-
+**Final Grade: 19.8**
