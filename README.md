@@ -1,4 +1,4 @@
-# RCOM
+# RCOM-projects
 [![GitHub license](https://img.shields.io/github/license/microsoft/ML-For-Beginners.svg)](LICENSE)
 [![Uporto FEUP](https://img.shields.io/badge/UPorto-FEUP-brown)](https://fe.up.pt)
 
